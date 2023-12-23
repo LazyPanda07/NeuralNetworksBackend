@@ -9,8 +9,8 @@ jobs:
     - name: Clone SDK
       uses: actions/checkout@v4
       with: 
-        name: 3DiVi/open-source-face-sdk
-        ref: refs/heads/main
+        repository: 3DiVi/open-source-face-sdk
+        ref: main
 
     - name: Setup
       run: pip install gdown
