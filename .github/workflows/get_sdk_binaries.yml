@@ -6,7 +6,7 @@ jobs:
   build_sdk:
     runs-on: windows-latest
     steps:
-    - name: Clone SDK
+    - name: Checkout SDK
       uses: actions/checkout@v4
       with: 
         repository: 3DiVi/open-source-face-sdk
@@ -15,9 +15,11 @@ jobs:
     - name: Setup
       run: pip install gdown
 
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@main
+
     - name: Build SDK
       run: |
-          $PSVersionTable
           Add-Content sdk\scripts\windows\make_project.ps1 "msbuild /p:Configuration=Release /p:Platform=x64 INSTALL.vcxproj"
           cd sdk && .\scripts\windows\make_project.ps1
 
