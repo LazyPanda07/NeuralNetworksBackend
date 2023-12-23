@@ -17,6 +17,7 @@ jobs:
 
     - name: Build SDK
       run: |
+          $PSVersionTable
           Add-Content sdk\scripts\windows\make_project.ps1 "msbuild /p:Configuration=Release /p:Platform=x64 INSTALL.vcxproj"
           cd sdk && .\scripts\windows\make_project.ps1
 
