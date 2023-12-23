@@ -1,0 +1,32 @@
+{
+  "WebServer": {
+    "ip": "0.0.0.0",
+    "port": "80",
+    "timeout": 0
+  },
+  "WebFramework": {
+    "settingsPaths": [
+      "web.json"
+    ],
+    "loadSources": [
+      "NeuralNetworksBackend.dll"
+    ],
+    "assetsPath": "assets",
+    "templatesPath": "templates",
+    "cachingSize": 0,
+    "webServerType": "multiThreaded",
+    "HTTPS": {
+      "useHTTPS": false,
+      "pathToCertificate": "certificates/cert.pem",
+      "pathToKey": "certificates/key.pem"
+    }
+  },
+  "Logging": {
+    "usingLogging": false,
+    "dateFormat": "DMY",
+    "addNewLineAfterLog": true
+  },
+  "ThreadPoolServer": {
+    "threadCount": 0
+  }
+}

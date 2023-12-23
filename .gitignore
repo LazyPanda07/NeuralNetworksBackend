@@ -30,3 +30,18 @@
 *.exe
 *.out
 *.app
+
+# Binaries
+bin/
+
+# VS folder
+.vs/
+
+# Models
+data/
+
+# Exclude SDK lib
+!NeuralNetworksBackend/sdk/lib/*.lib
+
+# Exclude Nvidia CUDA, CUDNN
+!NeuralNetworksBackend/nvidia/dll/*.dll
