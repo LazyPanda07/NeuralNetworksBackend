@@ -61,8 +61,9 @@
       <Command>xcopy /y $(ProjectDir)*.json $(OutDir)
 if exist $(OutDir)\*.lib del /f $(OutDir)*.lib
 if exist $(OutDir)\*.exp del /f $(OutDir)*.exp
-xcopy /y $(ProjectDir)sdk\dll\*.* $(OutDir)
-if not exist $(ProjectDir)sdk\data\ xcopy /y /s $(ProjectDir)sdk\data\ $(OutDir)data\</Command>
+if exist $(ProjectDir)sdk\dll xcopy /y $(ProjectDir)sdk\dll\*.* $(OutDir)
+if not exist $(ProjectDir)sdk\data\ xcopy /y /s $(ProjectDir)sdk\data\ $(OutDir)data\
+xcopy /y $(ProjectDir)nvidia\dll\*.* $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
