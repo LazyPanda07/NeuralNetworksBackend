@@ -22,7 +22,7 @@ jobs:
       run: |
           pip install gdown
           choco install wget
-          conda install cudatoolkit=10.1
+          # conda install cudatoolkit=10.1
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@main
