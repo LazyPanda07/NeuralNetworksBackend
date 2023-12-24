@@ -23,6 +23,7 @@ jobs:
 
     - name: Setup
       run: |
+          conda config --add pkgs_dirs ${{ github.workspace }}\conda
           pip install gdown
           choco install wget
           conda install cudatoolkit=10.1
@@ -64,6 +65,8 @@ jobs:
           
     - name: Build
       run: |
+          dir ${{ github.workspace }}
+          dir ${{ github.workspace }}\conda
           echo "WebFrameworkSDK="${{ github.workspace }}\WebFrameworkLibrary\ProductionRelease-x64\"" >> $Env:GITHUB_ENV
           msbuild /p:Configuration=Release /p:Platform=x64 NeuralNetworksBackend.sln
 
