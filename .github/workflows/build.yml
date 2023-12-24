@@ -47,14 +47,18 @@ jobs:
           Remove-Item sdk\build\make-install\dll\*.py
           Remove-Item -Path sdk\build\make-install\python_api -Recurse -Force
           
+    - name: Current directory
+      run: dir ${{ github.workspace }}
+
     - name: Copy
+      shell: bash
       working-directory: open-source-face-sdk
-      run: Copy-Item -Path sdk\build\make-install\* -Destination ${{ github.workspace }}\sdk -Recurse -Force
+      run: mv sdk\build\make-install\* ${{ github.workspace }}\sdk
   
     - name: Get WebFramework
       uses: actions/checkout@v4
       with:
-        repository: https://github.com/LazyPanda07/WebFramework.git
+        repository: LazyPanda07/WebFramework
         ref: build
         path: WebFrameworkLibrary
         submodules: true
