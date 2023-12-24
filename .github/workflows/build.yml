@@ -18,11 +18,14 @@ jobs:
         repository: 3DiVi/open-source-face-sdk
         path: open-source-face-sdk
         
+    - name: Setup conda
+      uses: conda-incubator/setup-miniconda@v3
+
     - name: Setup
       run: |
           pip install gdown
           choco install wget
-          # conda install cudatoolkit=10.1
+          conda install cudatoolkit=10.1
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@main
