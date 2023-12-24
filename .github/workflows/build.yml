@@ -50,12 +50,12 @@ jobs:
     - name: Current directory
       run: |
           dir ${{ github.workspace }}
-          dir ${{ github.workspace }}\sdk
+          dir ${{ github.workspace }}\NeuralNetworksBackend\sdk
 
     - name: Copy
       shell: bash
       working-directory: open-source-face-sdk
-      run: mv --force sdk/build/make-install/* "${{ github.workspace }}\sdk\"
+      run: mv --force sdk/build/make-install/* "${{ github.workspace }}\NeuralNetworksBackend\sdk\"
   
     - name: Get WebFramework
       uses: actions/checkout@v4
