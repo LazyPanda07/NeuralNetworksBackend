@@ -22,6 +22,7 @@ jobs:
       run: |
           pip install gdown
           choco install wget
+          choco install unzip
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@main
@@ -52,24 +53,15 @@ jobs:
       run: Copy-Item -Path sdk\build\make-install\* -Destination ${{ github.workspace }}\NeuralNetworksBackend\sdk -Recurse -Force
   
     - name: Get WebFramework
-      uses: actions/checkout@v4
-      with:
-        repository: LazyPanda07/WebFramework
-        ref: build
-        path: WebFrameworkLibrary
-        submodules: true
-
-    - name: Current directory
-      run: dir ${{ github.workspace }}
-        
-    - name: Setup WebFramework
+      shell: bash
       run: |
-          cd WebFrameworkLibrary
-          msbuild /p:Configuration=ProductionRelease /p:Platform=x64 WebFramework.sln
-          echo "WebFrameworkSDK=${{ github.workspace }}\WebFrameworkLibrary\build\ProductionRelease-x64" >> $Env:GITHUB_ENV
-
+          wget https://github.com/LazyPanda07/WebFramework/releases/download/v2.4/build.zip
+          unzip build.zip -d WebFrameworkLibrary
+          
     - name: Build
-      run: msbuild /p:Configuration=Release /p:Platform=x64 NeuralNetworksBackend.sln
+      run: |
+          echo "WebFrameworkSDK=${{ github.workspace }}\WebFrameworkLibrary\ProductionRelease-x64" >> $Env:GITHUB_ENV
+          msbuild /p:Configuration=Release /p:Platform=x64 NeuralNetworksBackend.sln
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
