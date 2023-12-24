@@ -13,7 +13,7 @@ jobs:
       with: 
         repository: 3DiVi/open-source-face-sdk
         path: open-source-face-sdk
-
+        
     - name: Setup
       run: |
           pip install gdown
@@ -43,10 +43,16 @@ jobs:
           Remove-Item sdk\build\make-install\dll\*.py
           Remove-Item -Path sdk\build\make-install\python_api -Recurse -Force
 
+    - name: Current directory
+      run: dir
+
     - name: Checkout NeuralNetworksBackend
       uses: actions/checkout@v4
       with:
         lfs: true
+
+    - name: Current directory
+      run: dir
 
     - name: Copy
       working-directory: open-source-face-sdk
@@ -62,10 +68,7 @@ jobs:
         ref: build
         path: WebFrameworkLibrary
         submodules: true
-
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@main
-
+        
     - name: Setup WebFramework
       run: |
           cd WebFrameworkLibrary
