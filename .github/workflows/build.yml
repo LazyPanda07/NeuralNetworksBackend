@@ -26,6 +26,7 @@ jobs:
           pip install gdown
           choco install wget
           conda install cudatoolkit=10.1
+          conda install -c conda-forge cudnn
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@main
@@ -63,8 +64,7 @@ jobs:
           
     - name: Build
       run: |
-          echo "WebFrameworkSDK=${{ github.workspace }}\WebFrameworkLibrary\ProductionRelease-x64\" >> $Env:GITHUB_ENV
-          echo $Env:GITHUB_ENV
+          echo "WebFrameworkSDK="${{ github.workspace }}\WebFrameworkLibrary\ProductionRelease-x64\"" >> $Env:GITHUB_ENV
           msbuild /p:Configuration=Release /p:Platform=x64 NeuralNetworksBackend.sln
 
     - name: Upload artifacts
