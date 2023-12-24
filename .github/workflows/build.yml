@@ -49,11 +49,8 @@ jobs:
           
     - name: Copy
       working-directory: open-source-face-sdk
-      run: Copy-Item -Path sdk\build\make-install\* -Destination ${{ github.workspace }}\sdk -Recurse
+      run: Copy-Item -Path sdk\build\make-install\* -Destination ${{ github.workspace }}\sdk -Recurse -Force
   
-    - name: Current directory
-      run: dir
-    
     - name: Get WebFramework
       uses: actions/checkout@v4
       with:
@@ -61,6 +58,9 @@ jobs:
         ref: build
         path: WebFrameworkLibrary
         submodules: true
+
+    - name: Current directory
+      run: dir ${{ github.workspace }}
         
     - name: Setup WebFramework
       run: |
