@@ -1,8 +1,25 @@
 #include "Infer.h"
 
 #include <future>
+#include <queue>
 
 #include "Timers.h"
+
+struct ProcessingBlockPriority
+{
+	constexpr bool operator()(const std::string& left, const std::string& right) const
+	{
+		auto getPriority = [this](const std::string& name) -> int
+			{
+				return name == "FACE_DETECTOR" ?
+					2 : name == "HUMAN_BODY_DETECTOR" ?
+					2 : name == "FITTER" ?
+					1 : 0;
+			};
+
+		return getPriority(left) < getPriority(right);
+	}
+};
 
 static std::vector<uint8_t> decodeBase64(std::string_view base64EncodedData)
 {
@@ -27,14 +44,14 @@ static std::vector<uint8_t> decodeBase64(std::string_view base64EncodedData)
 		{
 			break;
 		}
-			
+
 		c -= '+';
 
 		if (lookup[c] >= 64)
 		{
 			break;
 		}
-			
+
 		val = (val << 6) + lookup[c];
 
 		valb += 6;
@@ -74,22 +91,23 @@ void Infer::doPost(framework::HTTPRequest& request, framework::HTTPResponse& res
 		const json::JSONParser& parser = request.getJSON();
 		std::future<std::vector<uint8_t>> bytesFuture = std::async(std::launch::async, decodeBase64, parser.getString("data"));
 		api::Service service = api::Service::createService(sdkPath);
-		int64_t width = parser.getInt("width");
-		int64_t height = parser.getInt("height");
-		api::Context config = service.createContext();
-		std::vector<json::utility::jsonObject> result;
 		json::JSONBuilder responseBuilder(CP_UTF8);
-		double inferTime = 0.0;
-
-		config["unit_type"] = "FACE_DETECTOR";
-		config["ONNXRuntime"]["library_path"] = sdkPath;
-		config["use_cuda"] = forceUseCuda || (parser.contains("useCuda", json::utility::variantTypeEnum::jBool) ? parser.getBool("useCuda") : false);
-
-		api::ProcessingBlock detector = service.createProcessingBlock(config);
-
+		api::Context config = service.createContext();
+		std::priority_queue<std::string, std::vector<std::string>, ProcessingBlockPriority> unitTypes;
+		std::vector<json::utility::jsonObject> result;
 		api::Context data = service.createContext();
 		api::Context image = data["image"];
 		api::Context shape = image["shape"];
+		int64_t width = parser.getInt("width");
+		int64_t height = parser.getInt("height");
+
+		for (std::string& unitType : json::utility::JSONArrayWrapper(parser.getArray("unitTypes")).getAsStringArray())
+		{
+			unitTypes.push(std::move(unitType));
+		}
+
+		config["ONNXRuntime"]["library_path"] = sdkPath;
+		config["use_cuda"] = forceUseCuda || (parser.contains("useCuda", json::utility::variantTypeEnum::jBool) ? parser.getBool("useCuda") : false);
 
 		shape.push_back(height);
 		shape.push_back(width);
@@ -102,10 +120,15 @@ void Infer::doPost(framework::HTTPRequest& request, framework::HTTPResponse& res
 
 		image["blob"].setDataPtr(bytes.data());
 
+		while (unitTypes.size())
 		{
-			utility::timers::AccumulatingTimer timer(inferTime, utility::timers::OutputTimeType::milliseconds);
+			const std::string& unitType = unitTypes.top();
 
-			detector(data);
+			config["unit_type"] = unitType;
+
+			service.createProcessingBlock(config)(data);
+
+			unitTypes.pop();
 		}
 
 		for (const api::Context& object : data["objects"])
@@ -130,14 +153,7 @@ void Infer::doPost(framework::HTTPRequest& request, framework::HTTPResponse& res
 			json::utility::appendArray(std::move(jsonObject), result);
 		}
 
-		json::utility::jsonObject infer;
-
-		infer.setDouble("time", inferTime);
-		infer.setString("timeUnits", "ms");
-
 		responseBuilder["result"] = std::move(result);
-		responseBuilder["infer"] = std::move(infer);
-		responseBuilder["additionalInformation"] = json::utility::toUTF8JSON("Ну ты и пес канеш", 1251);
 
 		response.addBody(responseBuilder);
 	}
