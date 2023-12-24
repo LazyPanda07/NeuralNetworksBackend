@@ -1,6 +1,10 @@
 name: Get SDK binaries
 
-on: workflow_dispatch
+on: 
+  push: 
+    branches: [dev]
+  workflow_dispatch:
+
 
 jobs:
   build_sdk:
@@ -13,13 +17,15 @@ jobs:
         ref: main
 
     - name: Setup
-      run: pip install gdown
+      run: |
+          pip install gdown
+          Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+          choco install wget
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@main
 
     - name: Build SDK
-      shell: pwsh
       run: |
           Add-Content sdk\scripts\windows\make_project.ps1 "msbuild /p:Configuration=Release /p:Platform=x64 INSTALL.vcxproj"
           cd sdk && .\scripts\windows\make_project.ps1
