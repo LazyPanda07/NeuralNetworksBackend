@@ -26,7 +26,7 @@ jobs:
           pip install gdown
           choco install wget
           conda install cudatoolkit=10.1
-          conda install -c conda-forge cudnn
+          conda install -c conda-forge cudnn=7.6.5.32
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@main
