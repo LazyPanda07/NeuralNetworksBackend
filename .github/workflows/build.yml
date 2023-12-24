@@ -8,6 +8,10 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
+    - uses: actions/checkout@v4
+      with:
+       lfs: true
+
     - name: Checkout SDK
       uses: actions/checkout@v4
       with: 
@@ -42,18 +46,7 @@ jobs:
           Remove-Item sdk\build\make-install\dll\*.exe
           Remove-Item sdk\build\make-install\dll\*.py
           Remove-Item -Path sdk\build\make-install\python_api -Recurse -Force
-
-    - name: Current directory
-      run: dir
-
-    - name: Checkout NeuralNetworksBackend
-      uses: actions/checkout@v4
-      with:
-        lfs: true
-
-    - name: Current directory
-      run: dir
-
+          
     - name: Copy
       working-directory: open-source-face-sdk
       run: Copy-Item -Path sdk\build\make-install\* -Destination ${{ github.workspace }}\sdk -Recurse
