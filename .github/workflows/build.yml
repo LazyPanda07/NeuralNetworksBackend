@@ -50,7 +50,7 @@ jobs:
     - name: Copy
       shell: bash
       working-directory: open-source-face-sdk
-      run: mv --force  sdk/build/make-install/* ${{ github.workspace }}/sdk
+      run: mv --force sdk/build/make-install/* "${{ github.workspace }}\sdk"
   
     - name: Get WebFramework
       uses: actions/checkout@v4
