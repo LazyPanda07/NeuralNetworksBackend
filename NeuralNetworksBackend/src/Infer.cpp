@@ -4,6 +4,7 @@
 #include <queue>
 
 #include "Timers.h"
+#include "parsers/BaseParser.h"
 
 struct ProcessingBlockPriority
 {
@@ -93,17 +94,19 @@ void Infer::doPost(framework::HTTPRequest& request, framework::HTTPResponse& res
 		api::Service service = api::Service::createService(sdkPath);
 		json::JSONBuilder responseBuilder(CP_UTF8);
 		api::Context config = service.createContext();
-		std::priority_queue<std::string, std::vector<std::string>, ProcessingBlockPriority> unitTypes;
-		std::vector<json::utility::jsonObject> result;
+		std::vector<std::string> jsonUnitTypes(json::utility::JSONArrayWrapper(parser.getArray("unitTypes")).getAsStringArray());
 		api::Context data = service.createContext();
 		api::Context image = data["image"];
 		api::Context shape = image["shape"];
 		int64_t width = parser.getInt("width");
 		int64_t height = parser.getInt("height");
+		std::unordered_map<std::string, std::unique_ptr<BaseParser>> parsers = BaseParser::createParsers(jsonUnitTypes, static_cast<int>(width), static_cast<int>(height));
+		std::priority_queue<std::string, std::vector<std::string>, ProcessingBlockPriority> unitTypes;
+		std::vector<json::utility::jsonObject> result;
 		json::utility::jsonObject infer;
 		json::utility::jsonObject time;
 
-		for (std::string& unitType : json::utility::JSONArrayWrapper(parser.getArray("unitTypes")).getAsStringArray())
+		for (std::string& unitType : jsonUnitTypes)
 		{
 			unitTypes.push(std::move(unitType));
 		}
@@ -158,6 +161,11 @@ void Infer::doPost(framework::HTTPRequest& request, framework::HTTPResponse& res
 			jsonBbox.setObject("bottomRight", std::move(bottomRight));
 
 			jsonObject.setObject("boundingBox", std::move(jsonBbox));
+
+			for (const auto& [unitType, parser] : parsers)
+			{
+				jsonObject.setObject(unitType, parser->parse(object));
+			}
 
 			json::utility::appendArray(std::move(jsonObject), result);
 		}

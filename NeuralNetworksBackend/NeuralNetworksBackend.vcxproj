@@ -73,11 +73,31 @@ xcopy /y $(ProjectDir)microsoft\*.dll $(OutDir)</Command>
     <None Include="web.json" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\parsers\AgeParser.cpp" />
     <ClCompile Include="src\DllMain.cpp" />
     <ClCompile Include="src\Infer.cpp" />
+    <ClCompile Include="src\parsers\BaseParser.cpp" />
+    <ClCompile Include="src\parsers\EmotionParser.cpp" />
+    <ClCompile Include="src\parsers\EyeOpennessParser.cpp" />
+    <ClCompile Include="src\parsers\FitterParser.cpp" />
+    <ClCompile Include="src\parsers\GenderParser.cpp" />
+    <ClCompile Include="src\parsers\GlassesParser.cpp" />
+    <ClCompile Include="src\parsers\LivenessParser.cpp" />
+    <ClCompile Include="src\parsers\MaskParser.cpp" />
+    <ClCompile Include="src\parsers\PoseParser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Infer.h" />
+    <ClInclude Include="src\parsers\AgeParser.h" />
+    <ClInclude Include="src\parsers\BaseParser.h" />
+    <ClInclude Include="src\parsers\EmotionParser.h" />
+    <ClInclude Include="src\parsers\EyeOpennessParser.h" />
+    <ClInclude Include="src\parsers\FitterParser.h" />
+    <ClInclude Include="src\parsers\GenderParser.h" />
+    <ClInclude Include="src\parsers\GlassesParser.h" />
+    <ClInclude Include="src\parsers\LivenessParser.h" />
+    <ClInclude Include="src\parsers\MaskParser.h" />
+    <ClInclude Include="src\parsers\PoseParser.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
