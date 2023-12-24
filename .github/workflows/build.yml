@@ -5,14 +5,14 @@ on:
     branches: [dev]
 
 jobs:
-  sdk:
+  build:
     runs-on: windows-latest
     steps:
     - name: Checkout SDK
       uses: actions/checkout@v4
       with: 
         repository: 3DiVi/open-source-face-sdk
-        ref: main
+        path: open-source-face-sdk
 
     - name: Setup
       run: |
@@ -23,37 +23,35 @@ jobs:
       uses: microsoft/setup-msbuild@main
 
     - name: Build SDK
+      working-directory: open-source-face-sdk
       run: |
           Add-Content sdk\scripts\windows\make_project.ps1 "msbuild /p:Configuration=Release /p:Platform=x64 INSTALL.vcxproj"
           cd sdk && .\scripts\windows\make_project.ps1
 
+    - name: Rename
+      working-directory: open-source-face-sdk
+      run: Rename-Item -Path sdk\build\make-install\bin -NewName dll
+
     - name: Move libs
-      run: Move-Item -Path sdk\build\make-install\bin\*.lib -Destination sdk\build\make-install\lib
+      working-directory: open-source-face-sdk
+      run: Move-Item -Path sdk\build\make-install\dll\*.lib -Destination sdk\build\make-install\lib
 
     - name: Clean
+      working-directory: open-source-face-sdk
       run: |
-          Remove-Item sdk\build\make-install\bin\*.exe
-          Remove-Item sdk\build\make-install\bin\*.py
+          Remove-Item sdk\build\make-install\dll\*.exe
+          Remove-Item sdk\build\make-install\dll\*.py
           Remove-Item -Path sdk\build\make-install\python_api -Recurse -Force
-          
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: sdk
-        path: sdk/build/make-install/
-      
-  build:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v4
+
+    - name: Checkout NeuralNetworksBackend
+      uses: actions/checkout@v4
       with:
         lfs: true
-  
-    - name: Download artifacts
-      uses: actions/download-artifact@v4
-      with: 
-        name: sdk
 
+    - name: Copy
+      working-directory: open-source-face-sdk
+      run: Copy-Item -Path sdk\build\make-install\* -Destination ${{ github.workspace }}\sdk -Recurse
+  
     - name: Current directory
       run: dir
     

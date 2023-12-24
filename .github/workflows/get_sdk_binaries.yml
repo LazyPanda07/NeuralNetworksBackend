@@ -10,7 +10,6 @@ jobs:
       uses: actions/checkout@v4
       with: 
         repository: 3DiVi/open-source-face-sdk
-        ref: main
 
     - name: Setup
       run: |
@@ -25,13 +24,16 @@ jobs:
           Add-Content sdk\scripts\windows\make_project.ps1 "msbuild /p:Configuration=Release /p:Platform=x64 INSTALL.vcxproj"
           cd sdk && .\scripts\windows\make_project.ps1
 
+    - name: Rename
+      run: Rename-Item -Path sdk\build\make-install\bin -NewName dll
+
     - name: Move libs
-      run: Move-Item -Path sdk\build\make-install\bin\*.lib -Destination sdk\build\make-install\lib
+      run: Move-Item -Path sdk\build\make-install\dll\*.lib -Destination sdk\build\make-install\lib
 
     - name: Clean
       run: |
-          Remove-Item sdk\build\make-install\bin\*.exe
-          Remove-Item sdk\build\make-install\bin\*.py
+          Remove-Item sdk\build\make-install\dll\*.exe
+          Remove-Item sdk\build\make-install\dll\*.py
           Remove-Item -Path sdk\build\make-install\python_api -Recurse -Force
           
     - name: Upload artifacts
