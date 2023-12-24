@@ -46,16 +46,10 @@ jobs:
           Remove-Item sdk\build\make-install\dll\*.exe
           Remove-Item sdk\build\make-install\dll\*.py
           Remove-Item -Path sdk\build\make-install\python_api -Recurse -Force
-      
-    - name: Current directory
-      run: |
-          dir ${{ github.workspace }}
-          dir ${{ github.workspace }}\NeuralNetworksBackend\sdk
-
+          
     - name: Copy
-      shell: bash
       working-directory: open-source-face-sdk
-      run: mv --force sdk/build/make-install/* "${{ github.workspace }}\NeuralNetworksBackend\sdk\"
+      run: Copy-Item -Path sdk\build\make-install\* -Destination ${{ github.workspace }}\NeuralNetworksBackend\sdk -Recurse -Force
   
     - name: Get WebFramework
       uses: actions/checkout@v4
