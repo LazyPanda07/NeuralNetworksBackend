@@ -63,7 +63,8 @@ if exist $(OutDir)\*.lib del /f $(OutDir)*.lib
 if exist $(OutDir)\*.exp del /f $(OutDir)*.exp
 if exist $(ProjectDir)sdk\dll for /f %%f in ('dir /b $(ProjectDir)sdk\dll\') do if not exist $(OutDir)%%f xcopy /y $(ProjectDir)sdk\dll\%%f  $(OutDir)
 if not exist $(OutDir)\data\ xcopy /y /s $(ProjectDir)sdk\data\ $(OutDir)data\
-for /f %%f in ('dir /b $(ProjectDir)nvidia\dll\') do if not exist $(OutDir)%%f  xcopy /y $(ProjectDir)nvidia\dll\%%f $(OutDir)</Command>
+for /f %%f in ('dir /b $(ProjectDir)nvidia\') do if not exist $(OutDir)%%f  xcopy /y $(ProjectDir)nvidia\%%f $(OutDir)
+xcopy /y $(ProjectDir)microsoft\*.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

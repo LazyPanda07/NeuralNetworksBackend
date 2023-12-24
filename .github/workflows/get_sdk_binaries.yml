@@ -25,18 +25,18 @@ jobs:
           Add-Content sdk\scripts\windows\make_project.ps1 "msbuild /p:Configuration=Release /p:Platform=x64 INSTALL.vcxproj"
           cd sdk && .\scripts\windows\make_project.ps1
 
+    - name: Move libs
+      run: Move-Item -Path sdk\build\make-install\bin\*.lib -Destination sdk\build\make-install\lib
+
     - name: Clean
       run: |
           Remove-Item sdk\build\make-install\bin\*.exe
           Remove-Item sdk\build\make-install\bin\*.py
-          Remove-Item sdk\build\make-install\bin\*.lib
-
-    - name: Copy models
-      run: Copy-Item -Path sdk\build\make-install\data\* -Destination sdk\build\make-install\bin -Recurse
-
+          Remove-Item -Path sdk\build\make-install\python_api -Recurse -Force
+          
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: sdk
-        path: sdk/build/make-install/bin/
+        path: sdk/build/make-install/
       

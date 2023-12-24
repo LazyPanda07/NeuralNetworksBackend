@@ -44,4 +44,7 @@ data/
 !NeuralNetworksBackend/sdk/lib/*.lib
 
 # Exclude Nvidia CUDA, CUDNN
-!NeuralNetworksBackend/nvidia/dll/*.dll
+!NeuralNetworksBackend/nvidia/*.dll
+
+# Exclude Microsoft ONNX Runtime
+!NeuralNetworksBackend/microsoft/*.dll

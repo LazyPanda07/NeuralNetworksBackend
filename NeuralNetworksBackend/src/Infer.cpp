@@ -100,6 +100,8 @@ void Infer::doPost(framework::HTTPRequest& request, framework::HTTPResponse& res
 		api::Context shape = image["shape"];
 		int64_t width = parser.getInt("width");
 		int64_t height = parser.getInt("height");
+		json::utility::jsonObject infer;
+		json::utility::jsonObject time;
 
 		for (std::string& unitType : json::utility::JSONArrayWrapper(parser.getArray("unitTypes")).getAsStringArray())
 		{
@@ -123,10 +125,17 @@ void Infer::doPost(framework::HTTPRequest& request, framework::HTTPResponse& res
 		while (unitTypes.size())
 		{
 			const std::string& unitType = unitTypes.top();
+			double inferTime = 0.0;
 
 			config["unit_type"] = unitType;
 
-			service.createProcessingBlock(config)(data);
+			{
+				utility::timers::AccumulatingTimer timer(inferTime);
+
+				service.createProcessingBlock(config)(data);
+			}
+
+			time.setDouble(unitType, inferTime);
 
 			unitTypes.pop();
 		}
@@ -153,12 +162,18 @@ void Infer::doPost(framework::HTTPRequest& request, framework::HTTPResponse& res
 			json::utility::appendArray(std::move(jsonObject), result);
 		}
 
+		infer.setObject("time", std::move(time));
+		infer.setString("timeUnits", "ms");
+
+		responseBuilder["infer"] = std::move(infer);
 		responseBuilder["result"] = std::move(result);
 
 		response.addBody(responseBuilder);
 	}
 	catch (const std::exception& e)
 	{
+		response.setResponseCode(web::responseCodes::internalServerError);
+
 		response.addBody(e.what());
 	}
 }
