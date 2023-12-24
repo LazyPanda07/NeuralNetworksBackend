@@ -60,6 +60,7 @@ jobs:
     - name: Build
       run: |
           echo "WebFrameworkSDK=${{ github.workspace }}\WebFrameworkLibrary\ProductionRelease-x64\" >> $Env:GITHUB_ENV
+          dir ${{ env.WebFrameworkSDK }}
           msbuild /p:Configuration=Release /p:Platform=x64 NeuralNetworksBackend.sln
 
     - name: Upload artifacts
