@@ -1,0 +1,84 @@
+name: Build
+
+on: 
+  push: 
+    branches: [dev]
+
+jobs:
+  sdk:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout SDK
+      uses: actions/checkout@v4
+      with: 
+        repository: 3DiVi/open-source-face-sdk
+        ref: main
+
+    - name: Setup
+      run: |
+          pip install gdown
+          choco install wget
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@main
+
+    - name: Build SDK
+      run: |
+          Add-Content sdk\scripts\windows\make_project.ps1 "msbuild /p:Configuration=Release /p:Platform=x64 INSTALL.vcxproj"
+          cd sdk && .\scripts\windows\make_project.ps1
+
+    - name: Move libs
+      run: Move-Item -Path sdk\build\make-install\bin\*.lib -Destination sdk\build\make-install\lib
+
+    - name: Clean
+      run: |
+          Remove-Item sdk\build\make-install\bin\*.exe
+          Remove-Item sdk\build\make-install\bin\*.py
+          Remove-Item -Path sdk\build\make-install\python_api -Recurse -Force
+          
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: sdk
+        path: sdk/build/make-install/
+      
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        lfs: true
+  
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with: 
+        name: sdk
+
+    - name: Current directory
+      run: dir
+    
+    - name: Get WebFramework
+      uses: actions/checkout@v4
+      with:
+        repository: https://github.com/LazyPanda07/WebFramework.git
+        ref: build
+        path: WebFrameworkLibrary
+        submodules: true
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@main
+
+    - name: Setup WebFramework
+      run: |
+          cd WebFrameworkLibrary
+          msbuild /p:Configuration=ProductionRelease /p:Platform=x64 WebFramework.sln
+          echo "WebFrameworkSDK=${{ github.workspace }}\WebFrameworkLibrary\build\ProductionRelease-x64" >> $Env:GITHUB_ENV
+
+    - name: Build
+      run: msbuild /p:Configuration=Release /p:Platform=x64 NeuralNetworksBackend.sln
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: NeuralNetworksBackend
+        path: bin\Release-x64\NeuralNetworksBackend
