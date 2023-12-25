@@ -118,7 +118,7 @@ jobs:
           mkdir NeuralNetworksBackend/vendor/microsoft
           wget -O onnxruntime.zip https://github.com/microsoft/onnxruntime/releases/download/v1.4.0/onnxruntime-win-x64-gpu-1.4.0.zip
           unzip onnxruntime.zip -d onnxruntime
-          mv onnxruntime/lib/onnxruntime.dll NeuralNetworksBackend/vendor/microsoft/onnxruntime_cuda.dll
+          mv onnxruntime/onnxruntime-win-x64-gpu-1.4.0/lib/onnxruntime.dll NeuralNetworksBackend/vendor/microsoft/onnxruntime_cuda.dll
 
     - name: Build
       run: msbuild /p:Configuration=Release /p:Platform=x64 /p:WebFrameworkSDK=${{ github.workspace }}\WebFrameworkLibrary\build\ProductionRelease-x64\ NeuralNetworksBackend.sln 
