@@ -90,10 +90,11 @@ jobs:
     - name: Copy dependencies
       shell: bash
       run: |
-          cp -r -f -v JSON/bin/ProductionRelease-x64/JSON/* WebFrameworkLibrary/Localization/dependencies/JSON/libs/ProductionRelease-x64
-          cp -r -f -v ThreadPool/bin/Release-x64/ThreadPool/* WebFrameworkLibrary/FileManager/dependencies/ThreadPool/libs/release
+          cp -r -f JSON/bin/ProductionRelease-x64/JSON/* WebFrameworkLibrary/Localization/dependencies/JSON/libs/ProductionRelease-x64
+          cp -r -f ThreadPool/bin/Release-x64/ThreadPool/* WebFrameworkLibrary/FileManager/dependencies/ThreadPool/libs/release
 
     - name: Build WebFramework
+      shell: cmd
       run: |
           cd WebFrameworkLibrary
           msbuild /p:Configuration=ProductionRelease /p:Platform=x64 WebFramework.sln
