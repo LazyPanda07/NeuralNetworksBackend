@@ -2,7 +2,7 @@ name: Build
 
 on: 
   push: 
-    branches: [dev]
+    branches: [master]
 
 jobs:
   build:
@@ -128,3 +128,16 @@ jobs:
       with:
         name: NeuralNetworksBackend
         path: bin\Release-x64\NeuralNetworksBackend
+
+    - name: Download latest Simple Server
+      uses: robinraju/release-downloader@v1.8
+      with:
+        repository: LazyPanda07/SimpleServer
+        tarBall: false
+        zipBall: false
+
+    - name: Upload Simple Server
+      uses: actions/upload-artifact@v4
+      with:
+        name: SimpleServer
+        path: SimpleServer.zip
