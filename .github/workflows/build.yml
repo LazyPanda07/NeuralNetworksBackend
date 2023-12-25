@@ -90,8 +90,8 @@ jobs:
     - name: Copy dependencies
       shell: bash
       run: |
-          mv -f JSON/bin/ProductionRelease-x64/JSON/ WebFrameworkLibrary/Localization/dependencies/JSON/libs/ProductionRelease-x64
-          mv -f ThreadPool/bin/Release-x64/ThreadPool WebFrameworkLibrary/FileManager/dependencies/ThreadPool/libs/release
+          mv -f -v JSON/bin/ProductionRelease-x64/JSON/ WebFrameworkLibrary/Localization/dependencies/JSON/libs/ProductionRelease-x64
+          mv -f -v ThreadPool/bin/Release-x64/ThreadPool WebFrameworkLibrary/FileManager/dependencies/ThreadPool/libs/release
 
     - name: Build WebFramework
       run: |
