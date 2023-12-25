@@ -55,7 +55,7 @@ jobs:
           
     - name: Copy SDK
       working-directory: open-source-face-sdk
-      run: Copy-Item -Path sdk\build\make-install\* -Destination ${{ github.workspace }}\NeuralNetworksBackend\sdk -Recurse -Force
+      run: Copy-Item -Path sdk\build\make-install\* -Destination ${{ github.workspace }}\NeuralNetworksBackend\vendor\3divi -Recurse -Force
 
     - name: Checkout JSON
       uses: actions/checkout@v4
