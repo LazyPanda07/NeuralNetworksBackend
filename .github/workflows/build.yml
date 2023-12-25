@@ -8,10 +8,6 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-    - name: Find vcvars64.bat
-      shell: bash
-      run: find C:/ -name vcvars64.bat
-
     - uses: actions/checkout@v4
       with:
        lfs: true
