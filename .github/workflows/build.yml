@@ -53,21 +53,56 @@ jobs:
           Remove-Item sdk\build\make-install\dll\*.py
           Remove-Item -Path sdk\build\make-install\python_api -Recurse -Force
           
-    - name: Copy
+    - name: Copy SDK
       working-directory: open-source-face-sdk
       run: Copy-Item -Path sdk\build\make-install\* -Destination ${{ github.workspace }}\NeuralNetworksBackend\sdk -Recurse -Force
-  
-    - name: Get WebFramework
+
+    - name: Checkout JSON
+      uses: actions/checkout@v4
+      with:
+        repository: LazyPanda07/JSON
+        path: JSON
+
+    - name: Build JSON
+      run: |
+          cd JSON
+          msbuild /p:Configuration=ProductionRelease /p:Platform=x64 JSON.vcxproj
+
+    - name: Checkout ThreadPool
+      uses: actions/checkout@v4
+      with:
+        repository: LazyPanda07/ThreadPool
+        path: ThreadPool
+
+    - name: Build ThreadPool
+      run: |
+          cd ThreadPool
+          msbuild /p:Configuration=Release /p:Platform=x64 ThreadPool.vcxproj
+
+    - name: Checkout WebFramework
+      uses: actions/checkout@v4
+      with: 
+        repository: LazyPanda07/WebFramework
+        path: WebFrameworkLibrary
+        submodules: recursive
+        ref: build
+
+    - name: Copy dependencies
       shell: bash
       run: |
-          wget https://github.com/LazyPanda07/WebFramework/releases/download/v2.4/build.zip
-          unzip build.zip -d WebFrameworkLibrary
-          
+          mv JSON/bin/ProductionRelease-x64/JSON/ WebFrameworkLibrary/Localization/dependencies/JSON/libs/ProductionRelease-x64
+          mv ThreadPool/bin/Release-x64/ThreadPool WebFrameworkLibrary/FileManager/dependencies/ThreadPool/libs/release
+
+    - name: Build WebFramework
+      run: |
+          cd WebFrameworkLibrary
+          msbuild /p:Configuration=ProductionRelease /p:Platform=x64 WebFramework.sln
+
     - name: Build
       run: |
           Get-ChildItem -Path ${{ github.workspace }}\conda\cudatoolkit-10.1.243-h74a9793_0 -Recurse
           Get-ChildItem -Path ${{ github.workspace }}\conda\cudnn-7.6.5.32-h36d860d_1 -Recurse
-          msbuild /p:Configuration=Release /p:Platform=x64 /p:WebFrameworkSDK=${{ github.workspace }}\WebFrameworkLibrary\ProductionRelease-x64\ NeuralNetworksBackend.sln
+          msbuild /p:Configuration=Release /p:Platform=x64 /p:WebFrameworkSDK=${{ github.workspace }}\WebFrameworkLibrary\build\ProductionRelease-x64\ NeuralNetworksBackend.sln
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
