@@ -8,6 +8,10 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
+    - name: Find vcvars64.bat
+      shell: bash
+      run: find C:/ -name vcvars64.bat
+
     - uses: actions/checkout@v4
       with:
        lfs: true
@@ -94,7 +98,6 @@ jobs:
           cp -r -f ThreadPool/bin/Release-x64/ThreadPool/* WebFrameworkLibrary/FileManager/dependencies/ThreadPool/libs/release
 
     - name: Build WebFramework
-      shell: cmd
       run: |
           cd WebFrameworkLibrary
           msbuild /p:Configuration=ProductionRelease /p:Platform=x64 WebFramework.sln
