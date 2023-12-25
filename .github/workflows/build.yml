@@ -105,11 +105,23 @@ jobs:
           cd WebFrameworkLibrary
           msbuild /p:Configuration=ProductionRelease /p:Platform=x64 WebFramework.sln
 
-    - name: Build
+    - name: Copy Nvidia CUDA, CUDNN
+      shell: bash
       run: |
-          Get-ChildItem -Path ${{ github.workspace }}\conda\cudatoolkit-10.1.243-h74a9793_0 -Recurse
-          Get-ChildItem -Path ${{ github.workspace }}\conda\cudnn-7.6.5.32-h36d860d_1 -Recurse
-          msbuild /p:Configuration=Release /p:Platform=x64 /p:WebFrameworkSDK=${{ github.workspace }}\WebFrameworkLibrary\build\ProductionRelease-x64\ NeuralNetworksBackend.sln
+          mkdir vendor/nvidia
+          cp conda/cudatoolkit-10.1.243-h74a9793_0/Library/bin/*.dll vendor/nvidia
+          cp conda/cudnn-7.6.5.32-h36d860d_1/Library/bin/*.dll vendor/nvidia
+
+    - name: Get onnxruntime_cuda.dll
+      shell: bash
+      run: |
+          mkdir vendor/microsoft
+          wget -O onnxruntime.zip https://github.com/microsoft/onnxruntime/releases/download/v1.4.0/onnxruntime-win-x64-gpu-1.4.0.zip
+          unzip onnxruntime.zip -d onnxruntime
+          mv onnxruntime/lib/onnxruntime.dll vendor/microsoft/onnxruntime_cuda.dll
+
+    - name: Build
+      run: msbuild /p:Configuration=Release /p:Platform=x64 /p:WebFrameworkSDK=${{ github.workspace }}\WebFrameworkLibrary\build\ProductionRelease-x64\ NeuralNetworksBackend.sln 
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

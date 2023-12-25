@@ -1,2 +1,0 @@
-NeuralNetworksBackend/nvidia/*.dll filter=lfs diff=lfs merge=lfs -text
-NeuralNetworksBackend/microsoft/*.dll filter=lfs diff=lfs merge=lfs -text

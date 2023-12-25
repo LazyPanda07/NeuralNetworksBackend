@@ -45,7 +45,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DebugInformationFormat>None</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(WebFrameworkSDK)include\;$(ProjectDir)sdk\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WebFrameworkSDK)include\;$(ProjectDir)vendor\3divi\include\</AdditionalIncludeDirectories>
       <UndefinePreprocessorDefinitions>
       </UndefinePreprocessorDefinitions>
     </ClCompile>
@@ -54,17 +54,17 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(WebFrameworkSDK)libs\;$(ProjectDir)sdk\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(WebFrameworkSDK)libs\;$(ProjectDir)vendor\3divi\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>WebFramework.lib;open_source_sdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y $(ProjectDir)*.json $(OutDir)
 if exist $(OutDir)\*.lib del /f $(OutDir)*.lib
 if exist $(OutDir)\*.exp del /f $(OutDir)*.exp
-if exist $(ProjectDir)sdk\dll for /f %%f in ('dir /b $(ProjectDir)sdk\dll\') do if not exist $(OutDir)%%f xcopy /y $(ProjectDir)sdk\dll\%%f  $(OutDir)
-if not exist $(OutDir)\data\ xcopy /y /s $(ProjectDir)sdk\data\ $(OutDir)data\
-for /f %%f in ('dir /b $(ProjectDir)nvidia\') do if not exist $(OutDir)%%f  xcopy /y $(ProjectDir)nvidia\%%f $(OutDir)
-xcopy /y $(ProjectDir)microsoft\*.dll $(OutDir)</Command>
+if exist $(ProjectDir)vendor\3divi\dll for /f %%f in ('dir /b $(ProjectDir)vendor\3divi\dll\') do if not exist $(OutDir)%%f xcopy /y $(ProjectDir)vendor\3divi\dll\%%f  $(OutDir)
+if not exist $(OutDir)\data\ xcopy /y /s $(ProjectDir)vendor\3divi\data\ $(OutDir)data\
+for /f %%f in ('dir /b $(ProjectDir)vendor\nvidia\') do if not exist $(OutDir)%%f  xcopy /y $(ProjectDir)vendor\nvidia\%%f $(OutDir)
+xcopy /y $(ProjectDir)vendor\microsoft\*.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
