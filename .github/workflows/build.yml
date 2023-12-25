@@ -97,6 +97,13 @@ jobs:
           cp -r -f JSON/bin/ProductionRelease-x64/JSON/* WebFrameworkLibrary/Localization/dependencies/JSON/libs/ProductionRelease-x64
           cp -r -f ThreadPool/bin/Release-x64/ThreadPool/* WebFrameworkLibrary/FileManager/dependencies/ThreadPool/libs/release
 
+    - name: Initialize project localization
+      run: |
+          cd WebFrameworkLibrary
+          mkdir ProjectLocalization
+          cd ProjectLocalization
+          echo '{"originalLanguage":"en","otherLanguages":[],"pathToVisualStudio":"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise","debugOutputFolder":"","releaseOutputFolder":"","fileName":"LocalizationData"}' > localization_utils_settings.json
+
     - name: Build WebFramework
       run: |
           cd WebFrameworkLibrary
