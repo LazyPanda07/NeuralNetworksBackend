@@ -67,8 +67,7 @@ jobs:
       run: |
           Get-ChildItem -Path ${{ github.workspace }}\conda\cudatoolkit-10.1.243-h74a9793_0 -Recurse
           Get-ChildItem -Path ${{ github.workspace }}\conda\cudnn-7.6.5.32-h36d860d_1 -Recurse
-          set WebFrameworkSDK="${{ github.workspace }}\WebFrameworkLibrary\ProductionRelease-x64\"
-          msbuild /p:Configuration=Release /p:Platform=x64 NeuralNetworksBackend.sln
+          msbuild /p:Configuration=Release /p:Platform=x64 /p:WebFrameworkSDK=${{ github.workspace }}\WebFrameworkLibrary\ProductionRelease-x64\ NeuralNetworksBackend.sln
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
