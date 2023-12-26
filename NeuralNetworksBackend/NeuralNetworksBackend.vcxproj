@@ -77,6 +77,7 @@ xcopy /y $(ProjectDir)vendor\microsoft\*.dll $(OutDir)</Command>
     <ClCompile Include="src\DllMain.cpp" />
     <ClCompile Include="src\Infer.cpp" />
     <ClCompile Include="src\parsers\BaseParser.cpp" />
+    <ClCompile Include="src\parsers\BoundingBoxParser.cpp" />
     <ClCompile Include="src\parsers\EmotionParser.cpp" />
     <ClCompile Include="src\parsers\EyeOpennessParser.cpp" />
     <ClCompile Include="src\parsers\FitterParser.cpp" />
@@ -85,11 +86,13 @@ xcopy /y $(ProjectDir)vendor\microsoft\*.dll $(OutDir)</Command>
     <ClCompile Include="src\parsers\LivenessParser.cpp" />
     <ClCompile Include="src\parsers\MaskParser.cpp" />
     <ClCompile Include="src\parsers\PoseParser.cpp" />
+    <ClCompile Include="src\Sample.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Infer.h" />
     <ClInclude Include="src\parsers\AgeParser.h" />
     <ClInclude Include="src\parsers\BaseParser.h" />
+    <ClInclude Include="src\parsers\BoundingBoxParser.h" />
     <ClInclude Include="src\parsers\EmotionParser.h" />
     <ClInclude Include="src\parsers\EyeOpennessParser.h" />
     <ClInclude Include="src\parsers\FitterParser.h" />
@@ -98,6 +101,7 @@ xcopy /y $(ProjectDir)vendor\microsoft\*.dll $(OutDir)</Command>
     <ClInclude Include="src\parsers\LivenessParser.h" />
     <ClInclude Include="src\parsers\MaskParser.h" />
     <ClInclude Include="src\parsers\PoseParser.h" />
+    <ClInclude Include="src\Sample.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

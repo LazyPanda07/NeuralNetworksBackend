@@ -4,7 +4,7 @@
 #include <queue>
 
 #include "Timers.h"
-#include "parsers/BaseParser.h"
+#include "Sample.h"
 
 struct ProcessingBlockPriority
 {
@@ -21,52 +21,6 @@ struct ProcessingBlockPriority
 		return getPriority(left) < getPriority(right);
 	}
 };
-
-static std::vector<uint8_t> decodeBase64(std::string_view base64EncodedData)
-{
-	static constexpr uint8_t lookup[] =
-	{
-		62,  255, 62,  255, 63,  52,  53, 54, 55, 56, 57, 58, 59, 60, 61, 255,
-		255, 0,   255, 255, 255, 255, 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
-		10,  11,  12,  13,  14,  15,  16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
-		255, 255, 255, 255, 63,  255, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
-		36,  37,  38,  39,  40,  41,  42, 43, 44, 45, 46, 47, 48, 49, 50, 51
-	};
-
-	static_assert(sizeof(lookup) == 'z' - '+' + 1);
-
-	std::vector<uint8_t> result;
-	int val = 0;
-	int valb = -8;
-
-	for (uint8_t c : base64EncodedData)
-	{
-		if (c < '+' || c > 'z')
-		{
-			break;
-		}
-
-		c -= '+';
-
-		if (lookup[c] >= 64)
-		{
-			break;
-		}
-
-		val = (val << 6) + lookup[c];
-
-		valb += 6;
-
-		if (valb >= 0)
-		{
-			result.push_back((val >> valb) & 0xFF);
-
-			valb -= 8;
-		}
-	}
-
-	return result;
-}
 
 Infer::Infer() :
 	forceUseCuda(false)
@@ -90,90 +44,89 @@ void Infer::doPost(framework::HTTPRequest& request, framework::HTTPResponse& res
 	try
 	{
 		const json::JSONParser& parser = request.getJSON();
-		std::future<std::vector<uint8_t>> bytesFuture = std::async(std::launch::async, decodeBase64, parser.getString("data"));
+		std::vector<json::utility::jsonObject> images = json::utility::JSONArrayWrapper(parser.getArray("images")).getAsObjectArray();
 		api::Service service = api::Service::createService(sdkPath);
 		json::JSONBuilder responseBuilder(CP_UTF8);
-		api::Context config = service.createContext();
-		std::vector<std::string> jsonUnitTypes(json::utility::JSONArrayWrapper(parser.getArray("unitTypes")).getAsStringArray());
-		api::Context data = service.createContext();
-		api::Context image = data["image"];
-		api::Context shape = image["shape"];
-		int64_t width = parser.getInt("width");
-		int64_t height = parser.getInt("height");
-		std::unordered_map<std::string, std::unique_ptr<BaseParser>> parsers = BaseParser::createParsers(jsonUnitTypes, static_cast<int>(width), static_cast<int>(height));
 		std::priority_queue<std::string, std::vector<std::string>, ProcessingBlockPriority> unitTypes;
 		std::vector<json::utility::jsonObject> result;
-		json::utility::jsonObject infer;
-		json::utility::jsonObject time;
+		std::unordered_map<std::string, std::unique_ptr<api::ProcessingBlock>> pipeline;
+		std::vector<Sample> samples;
+		std::vector<std::string> jsonUnitTypes(json::utility::JSONArrayWrapper(parser.getArray("unitTypes")).getAsStringArray());
+		api::Context config = service.createContext();
 
-		for (std::string& unitType : jsonUnitTypes)
+		for (const std::string& unitType : jsonUnitTypes)
 		{
-			unitTypes.push(std::move(unitType));
+			unitTypes.push(unitType);
 		}
 
 		config["ONNXRuntime"]["library_path"] = sdkPath;
 		config["use_cuda"] = forceUseCuda || (parser.contains("useCuda", json::utility::variantTypeEnum::jBool) ? parser.getBool("useCuda") : false);
 
-		shape.push_back(height);
-		shape.push_back(width);
-		shape.push_back(parser.getInt("channels"));
-
-		image["format"] = "NDARRAY";
-		image["dtype"] = parser.getString("depthType");
-
-		std::vector<uint8_t> bytes(bytesFuture.get());
-
-		image["blob"].setDataPtr(bytes.data());
-
 		while (unitTypes.size())
 		{
 			const std::string& unitType = unitTypes.top();
-			double inferTime = 0.0;
 
 			config["unit_type"] = unitType;
 
-			{
-				utility::timers::AccumulatingTimer timer(inferTime);
-
-				service.createProcessingBlock(config)(data);
-			}
-
-			time.setDouble(unitType, inferTime);
+			pipeline[unitType] = std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config));
 
 			unitTypes.pop();
 		}
 
-		for (const api::Context& object : data["objects"])
+		samples.reserve(images.size());
+
+		for (const json::utility::jsonObject& image : images)
 		{
-			json::utility::jsonObject jsonObject;
-			json::utility::jsonObject jsonBbox;
-			json::utility::jsonObject topLeft;
-			json::utility::jsonObject bottomRight;
-			api::Context bbox = object["bbox"];
-
-			topLeft.setInt("x", static_cast<int64_t>(bbox[0].getDouble() * width));
-			topLeft.setInt("y", static_cast<int64_t>(bbox[1].getDouble() * height));
-
-			bottomRight.setInt("x", static_cast<int64_t>(bbox[2].getDouble() * width));
-			bottomRight.setInt("y", static_cast<int64_t>(bbox[3].getDouble() * height));
-
-			jsonBbox.setObject("topLeft", std::move(topLeft));
-			jsonBbox.setObject("bottomRight", std::move(bottomRight));
-
-			jsonObject.setObject("boundingBox", std::move(jsonBbox));
-
-			for (const auto& [unitType, parser] : parsers)
-			{
-				jsonObject.setObject(unitType, parser->parse(object));
-			}
-
-			json::utility::appendArray(std::move(jsonObject), result);
+			samples.emplace_back(image, service);
 		}
 
-		infer.setObject("time", std::move(time));
-		infer.setString("timeUnits", "ms");
+		for (const Sample& sample : samples)
+		{
+			std::unordered_map<std::string, std::unique_ptr<BaseParser>> parsers = sample.createParsers(jsonUnitTypes);
+			api::Context data = sample.createDataContext();
+			json::utility::jsonObject sampleObject;
+			std::vector<json::utility::jsonObject> sampleData;
+			json::utility::jsonObject infer;
+			json::utility::jsonObject time;
 
-		responseBuilder["infer"] = std::move(infer);
+			for (auto& [unitType, processingBlock] : pipeline)
+			{
+				double inferTime = 0.0;
+				
+				{
+					utility::timers::AccumulatingTimer timer(inferTime);
+
+					(*processingBlock)(data);
+				}
+
+				time.setDouble(unitType, inferTime);
+			}
+
+			for (const api::Context& object : data["objects"])
+			{
+				json::utility::jsonObject jsonObject;
+
+				for (const auto& [unitType, parser] : parsers)
+				{
+					jsonObject.setObject
+					(
+						unitType == "FACE_DETECTOR" || unitType == "HUMAN_BODY_DETECTOR" ? "boundingBox" : unitType,
+						parser->parse(object)
+					);
+				}
+
+				json::utility::appendArray(std::move(jsonObject), sampleData);
+			}
+
+			infer.setObject("time", std::move(time));
+			infer.setString("timeUnits", "ms");
+
+			sampleObject.setObject("infer", std::move(infer));
+			sampleObject.setArray("data", std::move(sampleData));
+
+			json::utility::appendArray(std::move(sampleObject), result);
+		}
+
 		responseBuilder["result"] = std::move(result);
 
 		response.addBody(responseBuilder);

@@ -12,6 +12,7 @@
 #include "EyeOpennessParser.h"
 #include "LivenessParser.h"
 #include "PoseParser.h"
+#include "BoundingBoxParser.h"
 
 template<std::derived_from<BaseParser> T>
 std::unique_ptr<BaseParser> creator(int imageWidth, int imageHeight)
@@ -21,6 +22,8 @@ std::unique_ptr<BaseParser> creator(int imageWidth, int imageHeight)
 
 static std::unordered_map<std::string, std::function<std::unique_ptr<BaseParser>(int, int)>> creators =
 {
+	{ "FACE_DETECTOR", creator<BoundingBoxParser> },
+	{ "HUMAN_BODY_DETECTOR", creator<BoundingBoxParser> },
 	{ "AGE_ESTIMATOR", creator<AgeParser> },
 	{ "GENDER_ESTIMATOR", creator<GenderParser> },
 	{ "EMOTION_ESTIMATOR", creator<EmotionParser> },
