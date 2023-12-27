@@ -9,8 +9,6 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
-      with:
-       lfs: true
 
     - name: Checkout SDK
       uses: actions/checkout@v4
@@ -142,3 +140,15 @@ jobs:
       with:
         name: SimpleServer
         path: SimpleServer.zip
+
+    - name: Publish NeuralNetworksBackend
+      uses: svenstaro/upload-release-action@v2
+      with:
+        file: bin\Release-x64\NeuralNetworksBackend\*
+        file_glob: true
+        overwrite: true
+
+    - name: Publish Simple Server
+      uses: svenstaro/upload-release-action@v2
+      with:
+        file: SimpleServer.zip
