@@ -149,24 +149,16 @@ jobs:
     needs: [build]
 
     steps:
-    - name: Download NeuralNetworksBackend
+    - name: Download artifacts
       uses: actions/download-artifact@v4
 
-    - name: Current dir
-      run: dir
-    
     - name: Create NeuralNetworksBackend.zip
       run: Compress-Archive -Path @("NeuralNetworksBackend") -DestinationPath NeuralNetworksBackend
 
-    # - name: Download latest Simple Server
-    #   uses: robinraju/release-downloader@v1.8
-    #   with:
-    #     repository: LazyPanda07/SimpleServer
-    #     latest: true
-    #     tarBall: false
-    #     zipBall: false
+    - name: Create SimpleServer.zip
+      run: Compress-Archive -Path @("SimpleServer") -DestinationPath SimpleServer
 
-    - name: Publish NeuralNetworksBackend
+    - name: Publish Neural Networks Backend
       uses: svenstaro/upload-release-action@master
       with:
         tag: v0.1.0
