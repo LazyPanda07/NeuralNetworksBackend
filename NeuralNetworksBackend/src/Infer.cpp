@@ -60,7 +60,7 @@ void Infer::doPost(framework::HTTPRequest& request, framework::HTTPResponse& res
 		}
 
 		config["ONNXRuntime"]["library_path"] = sdkPath;
-		config["use_cuda"] = forceUseCuda || (parser.contains("useCuda", json::utility::variantTypeEnum::jBool) ? parser.getBool("useCuda") : false);
+		config["use_cuda"] = images.size() > 4 && (forceUseCuda || (parser.contains("useCuda", json::utility::variantTypeEnum::jBool) ? parser.getBool("useCuda") : false));
 
 		while (unitTypes.size())
 		{

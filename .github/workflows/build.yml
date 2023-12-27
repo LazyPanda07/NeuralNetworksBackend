@@ -2,7 +2,7 @@ name: Build
 
 on: 
   push: 
-    branches: [master]
+    branches: [master, dev]
 
 jobs:
   build:
@@ -10,6 +10,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+  
+    - name: Setup variables
+      shell: bash
+      run: source version.env
+
+    - name: Print variable
+      run: echo "${{ env.VERSION }}"
 
     - name: Checkout SDK
       uses: actions/checkout@v4
@@ -149,21 +156,33 @@ jobs:
     needs: [build]
 
     steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup variables
+      shell: bash
+      run: source version.env
+
+    - uses: LazyPanda07/extract-current-branch@master
+
     - name: Download artifacts
+      if: ${{ env.CURRENT_BRANCH == 'master' }}
       uses: actions/download-artifact@v4
 
     - name: Create NeuralNetworksBackend.zip
+      if: ${{ env.CURRENT_BRANCH == 'master' }}
       run: Compress-Archive -Path @("NeuralNetworksBackend") -DestinationPath NeuralNetworksBackend
 
     - name: Publish Neural Networks Backend
+      if: ${{ env.CURRENT_BRANCH == 'master' }}
       uses: svenstaro/upload-release-action@master
       with:
-        tag: v0.1.0
+        tag: ${{ env.VERSION }}
         file: NeuralNetworksBackend.zip
 
     - name: Publish Simple Server
+      if: ${{ env.CURRENT_BRANCH == 'master' }}
       uses: svenstaro/upload-release-action@master
       with:
-        tag: v0.1.0
+        tag: ${{ env.VERSION }}
         file: SimpleServer/SimpleServer.zip
         
