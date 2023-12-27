@@ -1,5 +1,9 @@
 #include <Windows.h>
 
+#include <string_view>
+
+static inline constexpr std::string_view continuousContainerVersion = "0.2.0";
+
 BOOL WINAPI DllMain(
     HINSTANCE hinstDLL,  // handle to DLL module
     DWORD fdwReason,     // reason for calling function

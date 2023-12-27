@@ -3,7 +3,7 @@ name: Build
 on: 
   push: 
     branches: [master, dev]
-
+    
 jobs:
   build:
     runs-on: windows-latest
@@ -11,13 +11,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
   
-    - name: Setup variables
-      shell: bash
-      run: source version.env
-
-    - name: Print variable
-      run: echo "${{ env.VERSION }}"
-
     - name: Checkout SDK
       uses: actions/checkout@v4
       with: 
@@ -157,10 +150,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+  
+    - name: Setup release version variable
+      run: echo "VERSION=$($($($(Select-String -Path .\NeuralNetworksBackend\src\DllMain.cpp -Pattern version) -split '( = )')[2].TrimEnd(';')).Trim('\"'))" >> $Env:GITHUB_ENV
 
-    - name: Setup variables
-      shell: bash
-      run: source version.env
+    - name: Release version
+      run: echo ${{ env.VERSION }}
 
     - uses: LazyPanda07/extract-current-branch@master
 
@@ -176,13 +171,13 @@ jobs:
       if: ${{ env.CURRENT_BRANCH == 'master' }}
       uses: svenstaro/upload-release-action@master
       with:
-        tag: ${{ env.VERSION }}
+        tag: v${{ env.VERSION }}
         file: NeuralNetworksBackend.zip
 
     - name: Publish Simple Server
       if: ${{ env.CURRENT_BRANCH == 'master' }}
       uses: svenstaro/upload-release-action@master
       with:
-        tag: ${{ env.VERSION }}
+        tag: v${{ env.VERSION }}
         file: SimpleServer/SimpleServer.zip
         
