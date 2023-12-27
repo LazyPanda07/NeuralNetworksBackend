@@ -4,7 +4,8 @@
     "loadType": "dynamic",
     "initParameters": {
       "sdkPath": "",
-      "forceUseCuda": false
+      "forceUseCuda": false,
+      "cudaThreshold": 5
     }
   }
 }

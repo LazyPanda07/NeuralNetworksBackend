@@ -6,6 +6,8 @@
 #include "Timers.h"
 #include "Sample.h"
 
+static inline constexpr std::string version = "0.2.0";
+
 struct ProcessingBlockPriority
 {
 	constexpr bool operator()(const std::string& left, const std::string& right) const
@@ -23,6 +25,7 @@ struct ProcessingBlockPriority
 };
 
 Infer::Infer() :
+	cudaThreshold(0),
 	forceUseCuda(false)
 {
 
@@ -31,6 +34,7 @@ Infer::Infer() :
 void Infer::init(const framework::utility::JSONSettingsParser::ExecutorSettings& settings)
 {
 	sdkPath = settings.initParameters.getString("sdkPath");
+	cudaThreshold = settings.initParameters.getInt("cudaThreshold");
 	forceUseCuda = settings.initParameters.getBool("forceUseCuda");
 }
 
@@ -41,6 +45,8 @@ void Infer::doGet(framework::HTTPRequest& request, framework::HTTPResponse& resp
 
 void Infer::doPost(framework::HTTPRequest& request, framework::HTTPResponse& response)
 {
+	response.addHeader("NeuralNetworksBackendVersion", std::format("v{}", version));
+
 	try
 	{
 		const json::JSONParser& parser = request.getJSON();
@@ -60,7 +66,8 @@ void Infer::doPost(framework::HTTPRequest& request, framework::HTTPResponse& res
 		}
 
 		config["ONNXRuntime"]["library_path"] = sdkPath;
-		config["use_cuda"] = images.size() > 4 && (forceUseCuda || (parser.contains("useCuda", json::utility::variantTypeEnum::jBool) ? parser.getBool("useCuda") : false));
+		config["use_cuda"] = images.size() >= cudaThreshold && 
+			(forceUseCuda || (parser.contains("useCuda", json::utility::variantTypeEnum::jBool) ? parser.getBool("useCuda") : false));
 
 		while (unitTypes.size())
 		{

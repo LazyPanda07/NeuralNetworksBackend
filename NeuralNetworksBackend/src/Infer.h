@@ -8,6 +8,7 @@ class Infer : public framework::BaseHeavyOperationStatefulExecutor
 {
 private:
 	std::string sdkPath;
+	int64_t cudaThreshold;
 	bool forceUseCuda;
 
 public:
