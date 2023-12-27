@@ -144,7 +144,7 @@ jobs:
     - name: Publish NeuralNetworksBackend
       uses: svenstaro/upload-release-action@v2
       with:
-        file: bin\Release-x64\NeuralNetworksBackend\*
+        file: ${{ github.workspace }}\bin\Release-x64\NeuralNetworksBackend\*
         file_glob: true
         overwrite: true
 
