@@ -7,6 +7,7 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+
     steps:
     - uses: actions/checkout@v4
 
@@ -141,14 +142,39 @@ jobs:
         name: SimpleServer
         path: SimpleServer.zip
 
-    - name: Publish NeuralNetworksBackend
-      uses: svenstaro/upload-release-action@v2
+
+  publish:
+    runs-on: windows-latest
+    permissions: write-all
+    needs: [build]
+
+    steps:
+    - name: Download NeuralNetworksBackend
+      uses: actions/download-artifact@v3
       with:
-        file: ${{ github.workspace }}\bin\Release-x64\NeuralNetworksBackend\*
-        file_glob: true
-        overwrite: true
+        name: NeuralNetworksBackend
+        path: NeuralNetworksBackend
+    
+    - name: Create NeuralNetworksBackend.zip
+      run: Compress-Archive -Path @("NeuralNetworksBackend") -DestinationPath NeuralNetworksBackend
+
+    - name: Download latest Simple Server
+      uses: robinraju/release-downloader@v1.8
+      with:
+        repository: LazyPanda07/SimpleServer
+        latest: true
+        tarBall: false
+        zipBall: false
+
+    - name: Publish NeuralNetworksBackend
+      uses: svenstaro/upload-release-action@master
+      with:
+        tag: v0.1.0
+        file: NeuralNetworksBackend.zip
 
     - name: Publish Simple Server
-      uses: svenstaro/upload-release-action@v2
+      uses: svenstaro/upload-release-action@master
       with:
+        tag: v0.1.0
         file: SimpleServer.zip
+        
