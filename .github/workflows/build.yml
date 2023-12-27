@@ -150,21 +150,21 @@ jobs:
 
     steps:
     - name: Download NeuralNetworksBackend
-      uses: actions/download-artifact@v3
-      with:
-        name: NeuralNetworksBackend
-        path: NeuralNetworksBackend
+      uses: actions/download-artifact@v4
+
+    - name: Current dir
+      run: dir
     
     - name: Create NeuralNetworksBackend.zip
       run: Compress-Archive -Path @("NeuralNetworksBackend") -DestinationPath NeuralNetworksBackend
 
-    - name: Download latest Simple Server
-      uses: robinraju/release-downloader@v1.8
-      with:
-        repository: LazyPanda07/SimpleServer
-        latest: true
-        tarBall: false
-        zipBall: false
+    # - name: Download latest Simple Server
+    #   uses: robinraju/release-downloader@v1.8
+    #   with:
+    #     repository: LazyPanda07/SimpleServer
+    #     latest: true
+    #     tarBall: false
+    #     zipBall: false
 
     - name: Publish NeuralNetworksBackend
       uses: svenstaro/upload-release-action@master
