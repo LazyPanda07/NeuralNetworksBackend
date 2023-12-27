@@ -155,9 +155,6 @@ jobs:
     - name: Create NeuralNetworksBackend.zip
       run: Compress-Archive -Path @("NeuralNetworksBackend") -DestinationPath NeuralNetworksBackend
 
-    - name: Create SimpleServer.zip
-      run: Compress-Archive -Path @("SimpleServer") -DestinationPath SimpleServer
-
     - name: Publish Neural Networks Backend
       uses: svenstaro/upload-release-action@master
       with:
@@ -168,5 +165,5 @@ jobs:
       uses: svenstaro/upload-release-action@master
       with:
         tag: v0.1.0
-        file: SimpleServer.zip
+        file: SimpleServer/SimpleServer.zip
         
