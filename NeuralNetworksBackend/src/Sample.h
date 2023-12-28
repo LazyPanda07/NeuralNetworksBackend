@@ -37,5 +37,7 @@ public:
 
 	std::unordered_map<std::string, std::unique_ptr<BaseParser>> createParsers(const std::vector<std::string>& unitTypes) const;
 
+	const std::vector<uint8_t>& getImageData() const;
+
 	~Sample() = default;
 };

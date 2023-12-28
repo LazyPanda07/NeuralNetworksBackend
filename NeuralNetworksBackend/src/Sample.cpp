@@ -81,3 +81,8 @@ std::unordered_map<std::string, std::unique_ptr<BaseParser>> Sample::createParse
 {
 	return BaseParser::createParsers(unitTypes, static_cast<int>(width), static_cast<int>(height));
 }
+
+const std::vector<uint8_t>& Sample::getImageData() const
+{
+	return imageData;
+}

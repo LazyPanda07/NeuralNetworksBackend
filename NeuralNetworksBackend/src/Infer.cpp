@@ -104,6 +104,18 @@ void Infer::doPost(framework::HTTPRequest& request, framework::HTTPResponse& res
 					(*processingBlock)(data);
 				}
 
+				if (!data["objects"].size())
+				{
+					json::utility::jsonObject error;
+
+					error.setString("message", "No detections in image");
+					error.setString("imageData", reinterpret_cast<const char*>(sample.getImageData().data()));
+
+					sampleObject.setObject("error", std::move(error));
+
+					break;
+				}
+
 				time.setDouble(unitType, inferTime);
 			}
 
