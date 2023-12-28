@@ -106,14 +106,7 @@ void Infer::doPost(framework::HTTPRequest& request, framework::HTTPResponse& res
 
 				if (!data["objects"].size())
 				{
-					json::utility::jsonObject error;
-
-					error.setString("message", "No detections in image");
-					error.setString("imageData", reinterpret_cast<const char*>(sample.getImageData().data()));
-
-					sampleObject.setObject("error", std::move(error));
-
-					break;
+					throw std::runtime_error(reinterpret_cast<const char*>(sample.getImageData().data()));
 				}
 
 				time.setDouble(unitType, inferTime);
