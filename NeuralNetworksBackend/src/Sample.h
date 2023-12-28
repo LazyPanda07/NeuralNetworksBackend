@@ -10,6 +10,8 @@
 #include "JSONUtility.h"
 #include "api/Context.h"
 
+static inline constexpr std::string version = "0.2.0";
+
 class Sample
 {
 private:

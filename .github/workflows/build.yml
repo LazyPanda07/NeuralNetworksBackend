@@ -152,7 +152,7 @@ jobs:
     - uses: actions/checkout@v4
   
     - name: Setup release version variable
-      run: echo "VERSION=$($($($(Select-String -Path .\NeuralNetworksBackend\src\Infer.cpp -Pattern version) -split '( = )')[2].TrimEnd(';')).Trim('\"'))" >> $Env:GITHUB_ENV
+      run: echo "VERSION=$($($($(Select-String -Path .\NeuralNetworksBackend\src\Sample.h -Pattern version) -split '( = )')[2].TrimEnd(';')).Trim('\"'))" >> $Env:GITHUB_ENV
 
     - name: Release version
       run: echo ${{ env.VERSION }}

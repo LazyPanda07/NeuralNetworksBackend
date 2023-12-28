@@ -6,8 +6,6 @@
 #include "Timers.h"
 #include "Sample.h"
 
-static inline constexpr std::string version = "0.2.0";
-
 struct ProcessingBlockPriority
 {
 	constexpr bool operator()(const std::string& left, const std::string& right) const
