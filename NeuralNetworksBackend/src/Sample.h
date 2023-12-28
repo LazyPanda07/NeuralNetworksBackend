@@ -11,6 +11,7 @@
 #include "api/Context.h"
 
 static inline constexpr std::string version = "0.2.0";
+extern std::string pathToCurrentModule;
 
 class Sample
 {

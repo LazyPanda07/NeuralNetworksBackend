@@ -1,5 +1,10 @@
 #include <Windows.h>
 
+#include "Sample.h"
+
+static inline constexpr DWORD bufferSize = 1024;
+std::string pathToCurrentModule;
+
 BOOL WINAPI DllMain(
     HINSTANCE hinstDLL,  // handle to DLL module
     DWORD fdwReason,     // reason for calling function
@@ -11,6 +16,10 @@ BOOL WINAPI DllMain(
     case DLL_PROCESS_ATTACH:
         // Initialize once for each new process.
         // Return FALSE to fail DLL load.
+
+        pathToCurrentModule.resize(bufferSize);
+
+        pathToCurrentModule.resize(GetModuleFileNameA(hinstDLL, pathToCurrentModule.data(), bufferSize));
         break;
 
     case DLL_THREAD_ATTACH:

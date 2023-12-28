@@ -31,7 +31,7 @@ Infer::Infer() :
 
 void Infer::init(const framework::utility::JSONSettingsParser::ExecutorSettings& settings)
 {
-	sdkPath = settings.initParameters.getString("sdkPath");
+	sdkPath = std::filesystem::path(pathToCurrentModule).parent_path().string();
 	cudaThreshold = settings.initParameters.getInt("cudaThreshold");
 	forceUseCuda = settings.initParameters.getBool("forceUseCuda");
 }

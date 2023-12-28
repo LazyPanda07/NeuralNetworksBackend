@@ -3,7 +3,6 @@
     "route": "infer",
     "loadType": "dynamic",
     "initParameters": {
-      "sdkPath": "",
       "forceUseCuda": false,
       "cudaThreshold": 5
     }
