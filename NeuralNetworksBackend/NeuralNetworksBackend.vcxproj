@@ -73,6 +73,7 @@ if not exist $(OutDir)onnxruntime_cuda.dll xcopy /y $(ProjectDir)vendor\microsof
     <None Include="web.json" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\executors\BodyReidentify.cpp" />
     <ClCompile Include="src\executors\Recognize.cpp" />
     <ClCompile Include="src\parsers\AgeParser.cpp" />
     <ClCompile Include="src\DllMain.cpp" />
@@ -91,6 +92,7 @@ if not exist $(OutDir)onnxruntime_cuda.dll xcopy /y $(ProjectDir)vendor\microsof
     <ClCompile Include="src\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\executors\BodyReidentify.h" />
     <ClInclude Include="src\executors\Infer.h" />
     <ClInclude Include="src\executors\Recognize.h" />
     <ClInclude Include="src\parsers\AgeParser.h" />

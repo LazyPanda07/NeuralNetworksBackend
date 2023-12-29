@@ -14,5 +14,13 @@
       "cudaThreshold": 5,
       "forceUseCuda": false
     }
+  },
+  "BodyReidentify": {
+    "route": "body_reidentify",
+    "loadType": "dynamic",
+    "initParameters": {
+      "cudaThreshold": 5,
+      "forceUseCuda": false
+    }
   }
 }
