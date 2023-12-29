@@ -68,14 +68,14 @@ void Recognize::doGet(framework::HTTPRequest& request, framework::HTTPResponse& 
 				}
 
 				time.setDouble(unit_type, inferTime);
+
+				if (!data["objects"].size())
+				{
+					break;
+				}
 			}
 
 			preparedData.push_back(std::move(data));
-
-			if (!preparedData.back()["objects"].size())
-			{
-				break;
-			}
 
 			json::utility::appendArray(std::move(time), resultTime);
 		}
@@ -170,15 +170,20 @@ void Recognize::doPost(framework::HTTPRequest& request, framework::HTTPResponse&
 				}
 				
 				time.setDouble(unit_type, inferTime);
+
+				if (!data["objects"].size())
+				{
+					break;
+				}
 			}
 
 			preparedData.push_back(std::move(data));
 
 			json::utility::appendArray(std::move(time), resultTime);
 
-			if (preparedData.front()["objects"].size() > 1)
+			if (preparedData.front()["objects"].size() != 1)
 			{
-				throw std::runtime_error("More than 1 face in reference image");
+				throw std::runtime_error("Reference image must contains only 1 face");
 			}
 		}
 

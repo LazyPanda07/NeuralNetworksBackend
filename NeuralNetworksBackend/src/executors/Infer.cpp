@@ -105,14 +105,12 @@ void Infer::doPost(framework::HTTPRequest& request, framework::HTTPResponse& res
 					(*processingBlock)(data);
 				}
 
+				time.setDouble(unitType, inferTime);
+
 				if (!data["objects"].size())
 				{
-					// TODO: remake
-
-					throw std::runtime_error(reinterpret_cast<const char*>(sample.getImageData().data()));
+					break;
 				}
-
-				time.setDouble(unitType, inferTime);
 			}
 
 			for (const api::Context& object : data["objects"])
