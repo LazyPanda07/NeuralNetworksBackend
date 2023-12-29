@@ -3,8 +3,16 @@
     "route": "infer",
     "loadType": "dynamic",
     "initParameters": {
-      "forceUseCuda": false,
-      "cudaThreshold": 5
+      "cudaThreshold": 5,
+      "forceUseCuda": false
+    }
+  },
+  "Recognize": {
+    "route": "recognize",
+    "loadType": "dynamic",
+    "initParameters": {
+      "cudaThreshold": 5,
+      "forceUseCuda": false
     }
   }
 }

@@ -45,7 +45,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DebugInformationFormat>None</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(WebFrameworkSDK)include\;$(ProjectDir)vendor\3divi\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WebFrameworkSDK)include\;$(ProjectDir)vendor\3divi\include\;$(ProjectDir)src\</AdditionalIncludeDirectories>
       <UndefinePreprocessorDefinitions>
       </UndefinePreprocessorDefinitions>
     </ClCompile>
@@ -64,7 +64,7 @@ if exist $(OutDir)\*.exp del /f $(OutDir)*.exp
 if exist $(ProjectDir)vendor\3divi\dll for /f %%f in ('dir /b $(ProjectDir)vendor\3divi\dll\') do if not exist $(OutDir)%%f xcopy /y $(ProjectDir)vendor\3divi\dll\%%f  $(OutDir)
 if not exist $(OutDir)\data\ xcopy /y /s $(ProjectDir)vendor\3divi\data\ $(OutDir)data\
 for /f %%f in ('dir /b $(ProjectDir)vendor\nvidia\') do if not exist $(OutDir)%%f  xcopy /y $(ProjectDir)vendor\nvidia\%%f $(OutDir)
-xcopy /y $(ProjectDir)vendor\microsoft\*.dll $(OutDir)</Command>
+if not exist $(OutDir)onnxruntime_cuda.dll xcopy /y $(ProjectDir)vendor\microsoft\onnxruntime_cuda.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -73,9 +73,10 @@ xcopy /y $(ProjectDir)vendor\microsoft\*.dll $(OutDir)</Command>
     <None Include="web.json" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\executors\Recognize.cpp" />
     <ClCompile Include="src\parsers\AgeParser.cpp" />
     <ClCompile Include="src\DllMain.cpp" />
-    <ClCompile Include="src\Infer.cpp" />
+    <ClCompile Include="src\executors\Infer.cpp" />
     <ClCompile Include="src\parsers\BaseParser.cpp" />
     <ClCompile Include="src\parsers\BoundingBoxParser.cpp" />
     <ClCompile Include="src\parsers\EmotionParser.cpp" />
@@ -87,9 +88,11 @@ xcopy /y $(ProjectDir)vendor\microsoft\*.dll $(OutDir)</Command>
     <ClCompile Include="src\parsers\MaskParser.cpp" />
     <ClCompile Include="src\parsers\PoseParser.cpp" />
     <ClCompile Include="src\Sample.cpp" />
+    <ClCompile Include="src\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Infer.h" />
+    <ClInclude Include="src\executors\Infer.h" />
+    <ClInclude Include="src\executors\Recognize.h" />
     <ClInclude Include="src\parsers\AgeParser.h" />
     <ClInclude Include="src\parsers\BaseParser.h" />
     <ClInclude Include="src\parsers\BoundingBoxParser.h" />
@@ -102,6 +105,7 @@ xcopy /y $(ProjectDir)vendor\microsoft\*.dll $(OutDir)</Command>
     <ClInclude Include="src\parsers\MaskParser.h" />
     <ClInclude Include="src\parsers\PoseParser.h" />
     <ClInclude Include="src\Sample.h" />
+    <ClInclude Include="src\Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

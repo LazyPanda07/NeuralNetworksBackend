@@ -5,6 +5,7 @@
 
 #include "Timers.h"
 #include "Sample.h"
+#include "Utils.h"
 
 struct ProcessingBlockPriority
 {
@@ -23,6 +24,8 @@ struct ProcessingBlockPriority
 };
 
 Infer::Infer() :
+	sdkPath(utility::getPathToCurrentModule()),
+	service(api::Service::createService(sdkPath)),
 	cudaThreshold(0),
 	forceUseCuda(false)
 {
@@ -31,7 +34,6 @@ Infer::Infer() :
 
 void Infer::init(const framework::utility::JSONSettingsParser::ExecutorSettings& settings)
 {
-	sdkPath = std::filesystem::path(pathToCurrentModule).parent_path().string();
 	cudaThreshold = settings.initParameters.getInt("cudaThreshold");
 	forceUseCuda = settings.initParameters.getBool("forceUseCuda");
 }
@@ -49,7 +51,6 @@ void Infer::doPost(framework::HTTPRequest& request, framework::HTTPResponse& res
 	{
 		const json::JSONParser& parser = request.getJSON();
 		std::vector<json::utility::jsonObject> images = json::utility::JSONArrayWrapper(parser.getArray("images")).getAsObjectArray();
-		api::Service service = api::Service::createService(sdkPath);
 		json::JSONBuilder responseBuilder(CP_UTF8);
 		std::priority_queue<std::string, std::vector<std::string>, ProcessingBlockPriority> unitTypes;
 		std::vector<json::utility::jsonObject> result;
@@ -64,7 +65,7 @@ void Infer::doPost(framework::HTTPRequest& request, framework::HTTPResponse& res
 		}
 
 		config["ONNXRuntime"]["library_path"] = sdkPath;
-		config["use_cuda"] = images.size() >= cudaThreshold && 
+		config["use_cuda"] = images.size() >= static_cast<size_t>(cudaThreshold) &&
 			(forceUseCuda || (parser.contains("useCuda", json::utility::variantTypeEnum::jBool) ? parser.getBool("useCuda") : false));
 
 		while (unitTypes.size())
@@ -106,6 +107,8 @@ void Infer::doPost(framework::HTTPRequest& request, framework::HTTPResponse& res
 
 				if (!data["objects"].size())
 				{
+					// TODO: remake
+
 					throw std::runtime_error(reinterpret_cast<const char*>(sample.getImageData().data()));
 				}
 

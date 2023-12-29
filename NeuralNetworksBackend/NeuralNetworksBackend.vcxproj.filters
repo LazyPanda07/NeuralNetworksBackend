@@ -23,7 +23,7 @@
     <ClCompile Include="src\DllMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Infer.cpp">
+    <ClCompile Include="src\executors\Infer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\parsers\BaseParser.cpp">
@@ -62,9 +62,15 @@
     <ClCompile Include="src\parsers\BoundingBoxParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\executors\Recognize.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Infer.h">
+    <ClInclude Include="src\executors\Infer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\parsers\BaseParser.h">
@@ -101,6 +107,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\parsers\BoundingBoxParser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\executors\Recognize.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

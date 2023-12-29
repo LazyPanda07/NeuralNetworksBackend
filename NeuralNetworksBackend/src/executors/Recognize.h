@@ -4,15 +4,16 @@
 
 #include "api/Service.h"
 
-class Infer : public framework::BaseHeavyOperationStatefulExecutor
+class Recognize : public framework::BaseHeavyOperationStatefulExecutor
 {
 private:
 	std::string sdkPath;
+	api::Service service;
 	int64_t cudaThreshold;
 	bool forceUseCuda;
 
 public:
-	Infer();
+	Recognize();
 
 	void init(const framework::utility::JSONSettingsParser::ExecutorSettings& settings) override;
 
@@ -32,7 +33,7 @@ public:
 
 	void destroy() override;
 
-	~Infer() = default;
+	~Recognize() = default;
 };
 
-EXECUTOR_CREATION_FUNCTION(Infer)
+EXECUTOR_CREATION_FUNCTION(Recognize)
