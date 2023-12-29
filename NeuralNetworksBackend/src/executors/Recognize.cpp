@@ -2,6 +2,7 @@
 
 #include "Sample.h"
 #include "Utils.h"
+#include "Timers.h"
 
 Recognize::Recognize() :
 	sdkPath(utility::getPathToCurrentModule()),
@@ -20,14 +21,17 @@ void Recognize::init(const framework::utility::JSONSettingsParser::ExecutorSetti
 
 void Recognize::doGet(framework::HTTPRequest& request, framework::HTTPResponse& response)
 {
+	response.addHeader("NeuralNetworksBackendVersion", std::format("v{}", version));
+
 	try
 	{
 		const json::JSONParser& parser = request.getJSON();
 		std::vector<Sample> samples;
 		api::Context config = service.createContext();
-		std::vector<std::unique_ptr<api::ProcessingBlock>> pipeline;
+		std::vector<std::pair<std::string, std::unique_ptr<api::ProcessingBlock>>> pipeline;
 		std::vector<api::Context> preparedData;
 		json::JSONBuilder responseBuilder(CP_UTF8);
+		std::vector<json::utility::jsonObject> resultTime;
 
 		samples.reserve(2);
 
@@ -37,13 +41,13 @@ void Recognize::doGet(framework::HTTPRequest& request, framework::HTTPResponse& 
 		config["ONNXRuntime"]["library_path"] = sdkPath;
 
 		config["unit_type"] = "FACE_DETECTOR";
-		pipeline.emplace_back(std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
+		pipeline.emplace_back(config["unit_type"].getString(), std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
 
 		config["unit_type"] = "FITTER";
-		pipeline.emplace_back(std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
+		pipeline.emplace_back(config["unit_type"].getString(), std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
 
 		config["unit_type"] = "FACE_RECOGNIZER";
-		pipeline.emplace_back(std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
+		pipeline.emplace_back(config["unit_type"].getString(), std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
 
 		config["unit_type"] = "MATCHER_MODULE";
 		api::ProcessingBlock matcher = service.createProcessingBlock(config);
@@ -51,16 +55,32 @@ void Recognize::doGet(framework::HTTPRequest& request, framework::HTTPResponse& 
 		for (const Sample& sample : samples)
 		{
 			api::Context data = sample.createDataContext();
+			json::utility::jsonObject time;
 
-			for (const std::unique_ptr<api::ProcessingBlock>& processingBlock : pipeline)
+			for (const auto& [unit_type, processingBlock] : pipeline)
 			{
-				(*processingBlock)(data);
+				double inferTime = 0.0;
+
+				{
+					utility::timers::AccumulatingTimer timer(inferTime);
+
+					(*processingBlock)(data);
+				}
+
+				time.setDouble(unit_type, inferTime);
 			}
 
 			preparedData.push_back(std::move(data));
+
+			if (!preparedData.back()["objects"].size())
+			{
+				break;
+			}
+
+			json::utility::appendArray(std::move(time), resultTime);
 		}
 
-		if (std::ranges::any_of(preparedData, [](const api::Context& context) { return context["objects"].size() > 1; }))
+		if (std::ranges::any_of(preparedData, [](const api::Context& context) { return context["objects"].size() != 1; }))
 		{
 			throw std::runtime_error("Images must contains only 1 face");
 		}
@@ -74,8 +94,14 @@ void Recognize::doGet(framework::HTTPRequest& request, framework::HTTPResponse& 
 
 		matcher(matcherData);
 
+		json::utility::jsonObject time;
+
+		time.setArray("time", std::move(resultTime));
+		time.setString("timeUnits", "ms");
+
 		responseBuilder["distance"] = verification["result"]["distance"].getDouble();
 		responseBuilder["verdict"] = verification["result"]["verdict"].getBool();
+		responseBuilder["time"] = std::move(time);
 
 		response.addBody(responseBuilder);
 	}
@@ -89,16 +115,19 @@ void Recognize::doGet(framework::HTTPRequest& request, framework::HTTPResponse& 
 
 void Recognize::doPost(framework::HTTPRequest& request, framework::HTTPResponse& response)
 {
+	response.addHeader("NeuralNetworksBackendVersion", std::format("v{}", version));
+
 	try
 	{
 		const json::JSONParser& parser = request.getJSON();
 		std::vector<Sample> samples;
 		std::vector<json::utility::jsonObject> images = json::utility::JSONArrayWrapper(parser.getArray("images")).getAsObjectArray();
 		api::Context config = service.createContext();
-		std::vector<std::unique_ptr<api::ProcessingBlock>> pipeline;
+		std::vector<std::pair<std::string, std::unique_ptr<api::ProcessingBlock>>> pipeline;
 		std::vector<api::Context> preparedData;
 		json::JSONBuilder responseBuilder(CP_UTF8);
 		std::vector<json::utility::jsonObject> result;
+		std::vector<json::utility::jsonObject> resultTime;
 
 		samples.reserve(images.size() + 1);
 
@@ -114,13 +143,13 @@ void Recognize::doPost(framework::HTTPRequest& request, framework::HTTPResponse&
 			(forceUseCuda || (parser.contains("useCuda", json::utility::variantTypeEnum::jBool) ? parser.getBool("useCuda") : false));
 
 		config["unit_type"] = "FACE_DETECTOR";
-		pipeline.emplace_back(std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
+		pipeline.emplace_back(config["unit_type"].getString(), std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
 
 		config["unit_type"] = "FITTER";
-		pipeline.emplace_back(std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
+		pipeline.emplace_back(config["unit_type"].getString(), std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
 
 		config["unit_type"] = "FACE_RECOGNIZER";
-		pipeline.emplace_back(std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
+		pipeline.emplace_back(config["unit_type"].getString(), std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
 
 		config["unit_type"] = "MATCHER_MODULE";
 		api::ProcessingBlock matcher = service.createProcessingBlock(config);
@@ -128,13 +157,24 @@ void Recognize::doPost(framework::HTTPRequest& request, framework::HTTPResponse&
 		for (const Sample& sample : samples)
 		{
 			api::Context data = sample.createDataContext();
+			json::utility::jsonObject time;
 
-			for (const std::unique_ptr<api::ProcessingBlock>& processingBlock : pipeline)
+			for (const auto& [unit_type, processingBlock] : pipeline)
 			{
-				(*processingBlock)(data);
+				double inferTime = 0.0;
+
+				{
+					utility::timers::AccumulatingTimer timer(inferTime);
+
+					(*processingBlock)(data);
+				}
+				
+				time.setDouble(unit_type, inferTime);
 			}
 
 			preparedData.push_back(std::move(data));
+
+			json::utility::appendArray(std::move(time), resultTime);
 
 			if (preparedData.front()["objects"].size() > 1)
 			{
@@ -186,7 +226,13 @@ void Recognize::doPost(framework::HTTPRequest& request, framework::HTTPResponse&
 			json::utility::appendArray(std::move(recognitionResult), result);
 		}
 
+		json::utility::jsonObject time;
+
+		time.setArray("time", std::move(resultTime));
+		time.setString("timeUnits", "ms");
+
 		responseBuilder["result"] = std::move(result);
+		responseBuilder["time"] = std::move(time);
 
 		response.addBody(responseBuilder);
 	}
