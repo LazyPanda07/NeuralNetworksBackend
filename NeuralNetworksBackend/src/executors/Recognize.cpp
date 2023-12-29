@@ -13,16 +13,78 @@ Recognize::Recognize() :
 }
 
 void Recognize::init(const framework::utility::JSONSettingsParser::ExecutorSettings& settings)
-{	
+{
 	cudaThreshold = settings.initParameters.getInt("cudaThreshold");
 	forceUseCuda = settings.initParameters.getBool("forceUseCuda");
 }
 
 void Recognize::doGet(framework::HTTPRequest& request, framework::HTTPResponse& response)
 {
-	const json::JSONParser& parser = request.getJSON();
+	try
+	{
+		const json::JSONParser& parser = request.getJSON();
+		std::vector<Sample> samples;
+		api::Context config = service.createContext();
+		std::vector<std::unique_ptr<api::ProcessingBlock>> pipeline;
+		std::vector<api::Context> preparedData;
+		json::JSONBuilder responseBuilder(CP_UTF8);
 
+		samples.reserve(2);
 
+		samples.emplace_back(parser.getObject("firstImage"), service);
+		samples.emplace_back(parser.getObject("secondImage"), service);
+
+		config["ONNXRuntime"]["library_path"] = sdkPath;
+
+		config["unit_type"] = "FACE_DETECTOR";
+		pipeline.emplace_back(std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
+
+		config["unit_type"] = "FITTER";
+		pipeline.emplace_back(std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
+
+		config["unit_type"] = "FACE_RECOGNIZER";
+		pipeline.emplace_back(std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
+
+		config["unit_type"] = "MATCHER_MODULE";
+		api::ProcessingBlock matcher = service.createProcessingBlock(config);
+
+		for (const Sample& sample : samples)
+		{
+			api::Context data = sample.createDataContext();
+
+			for (const std::unique_ptr<api::ProcessingBlock>& processingBlock : pipeline)
+			{
+				(*processingBlock)(data);
+			}
+
+			preparedData.push_back(std::move(data));
+		}
+
+		if (std::ranges::any_of(preparedData, [](const api::Context& context) { return context["objects"].size() > 1; }))
+		{
+			throw std::runtime_error("Images must contains only 1 face");
+		}
+
+		api::Context matcherData = service.createContext();
+		api::Context verification = matcherData["verification"];
+		api::Context verificationObjects = verification["objects"];
+
+		verificationObjects.push_back(preparedData[0]["objects"][0]);
+		verificationObjects.push_back(preparedData[1]["objects"][0]);
+
+		matcher(matcherData);
+
+		responseBuilder["distance"] = verification["result"]["distance"].getDouble();
+		responseBuilder["verdict"] = verification["result"]["verdict"].getBool();
+
+		response.addBody(responseBuilder);
+	}
+	catch (const std::exception& e)
+	{
+		response.setResponseCode(web::responseCodes::internalServerError);
+
+		response.addBody(e.what());
+	}
 }
 
 void Recognize::doPost(framework::HTTPRequest& request, framework::HTTPResponse& response)
@@ -41,7 +103,7 @@ void Recognize::doPost(framework::HTTPRequest& request, framework::HTTPResponse&
 		samples.reserve(images.size() + 1);
 
 		samples.emplace_back(parser.getObject("referenceImage"), service);
-		
+
 		for (const json::utility::jsonObject& image : images)
 		{
 			samples.emplace_back(image, service);
@@ -79,8 +141,6 @@ void Recognize::doPost(framework::HTTPRequest& request, framework::HTTPResponse&
 				throw std::runtime_error("More than 1 face in reference image");
 			}
 		}
-
-		response.addHeader("Images", std::to_string(preparedData.size()));
 
 		for (size_t i = 1; i < preparedData.size(); i++)
 		{
