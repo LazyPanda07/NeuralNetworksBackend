@@ -10,7 +10,7 @@
 #include "JSONUtility.h"
 #include "api/Context.h"
 
-static inline constexpr std::string version = "0.3.0";
+static inline constexpr std::string version = "0.3.1";
 extern std::string pathToCurrentModule;
 
 class Sample
