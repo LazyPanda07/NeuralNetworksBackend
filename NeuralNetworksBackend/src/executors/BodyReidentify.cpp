@@ -39,24 +39,37 @@ void BodyReidentify::init(const framework::utility::JSONSettingsParser::Executor
 
 void BodyReidentify::doGet(framework::HTTPRequest& request, framework::HTTPResponse& response)
 {
+	throw framework::exceptions::NotImplementedException();
+}
+
+void BodyReidentify::doPost(framework::HTTPRequest& request, framework::HTTPResponse& response)
+{
 	response.addHeader("NeuralNetworksBackendVersion", std::format("v{}", version));
 
 	try
 	{
 		const json::JSONParser& parser = request.getJSON();
+		std::vector<json::utility::jsonObject> images = json::utility::JSONArrayWrapper(parser.getArray("images")).getAsObjectArray();
 		std::vector<Sample> samples;
 		api::Context config = service.createContext();
 		std::vector<std::pair<std::string, std::unique_ptr<api::ProcessingBlock>>> pipeline;
 		std::vector<api::Context> preparedData;
 		json::JSONBuilder responseBuilder(CP_UTF8);
 		std::vector<json::utility::jsonObject> resultTime;
+		std::vector<json::utility::jsonObject> result;
+		
+		samples.reserve(images.size() + 1);
 
-		samples.reserve(2);
+		samples.emplace_back(parser.getObject("referenceImage"), service);
 
-		samples.emplace_back(parser.getObject("firstImage"), service);
-		samples.emplace_back(parser.getObject("secondImage"), service);
+		for (const json::utility::jsonObject& image : images)
+		{
+			samples.emplace_back(image, service);
+		}
 
 		config["ONNXRuntime"]["library_path"] = sdkPath;
+		config["use_cuda"] = images.size() >= static_cast<size_t>(cudaThreshold) &&
+			(forceUseCuda || (parser.contains("useCuda", json::utility::variantTypeEnum::jBool) ? parser.getBool("useCuda") : false));
 
 		config["unit_type"] = "HUMAN_BODY_DETECTOR";
 		pipeline.emplace_back(config["unit_type"].getString(), std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
@@ -84,41 +97,46 @@ void BodyReidentify::doGet(framework::HTTPRequest& request, framework::HTTPRespo
 
 				time.setDouble(unit_type, inferTime);
 
-				if (!data["objects"].size())
+				if (data["objects"].size() != 1)
 				{
-					break;
+					throw std::runtime_error("All images must contains only 1 body");
 				}
 			}
+
+			BodyReidentify::convertDoubleToFloat(data);
 
 			preparedData.push_back(std::move(data));
 
 			json::utility::appendArray(std::move(time), resultTime);
 		}
 
-		if (std::ranges::any_of(preparedData, [](const api::Context& context) { return context["objects"].size() != 1; }))
-		{
-			throw std::runtime_error("Images must contains only 1 body");
-		}
-
 		api::Context matcherData = service.createContext();
 		api::Context verification = matcherData["verification"];
 		api::Context verificationObjects = verification["objects"];
-		
-		BodyReidentify::convertDoubleToFloat(preparedData[0]);
-		BodyReidentify::convertDoubleToFloat(preparedData[1]);
 
-		verificationObjects.push_back(preparedData[0]["output_data"]);
-		verificationObjects.push_back(preparedData[1]["output_data"]);
+		for (size_t i = 1; i < preparedData.size(); i++)
+		{
+			verificationObjects.clear();
 
-		matcher(matcherData);
+			verificationObjects.push_back(preparedData.front()["output_data"]);
+			verificationObjects.push_back(preparedData[i]["output_data"]);
+
+			matcher(matcherData);
+
+			json::utility::jsonObject verificationObject;
+
+			verificationObject.setDouble("distance", verification["result"]["distance"].getDouble());
+			verificationObject.setBool("verdict", verification["result"]["verdict"].getBool());
+
+			json::utility::appendArray(std::move(verificationObject), result);
+		}
 
 		json::utility::jsonObject time;
 
 		time.setArray("time", std::move(resultTime));
 		time.setString("timeUnits", "ms");
 
-		responseBuilder["distance"] = verification["result"]["distance"].getDouble();
-		responseBuilder["verdict"] = verification["result"]["verdict"].getBool();
+		responseBuilder["result"] = std::move(result);
 		responseBuilder["time"] = std::move(time);
 
 		response.addBody(responseBuilder);
@@ -129,11 +147,6 @@ void BodyReidentify::doGet(framework::HTTPRequest& request, framework::HTTPRespo
 
 		response.addBody(e.what());
 	}
-}
-
-void BodyReidentify::doPost(framework::HTTPRequest& request, framework::HTTPResponse& response)
-{
-	throw framework::exceptions::NotImplementedException();
 }
 
 void BodyReidentify::doHead(framework::HTTPRequest& request, framework::HTTPResponse& response)
