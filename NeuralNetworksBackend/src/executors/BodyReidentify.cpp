@@ -104,9 +104,13 @@ void BodyReidentify::doPost(framework::HTTPRequest& request, framework::HTTPResp
 
 				time.setDouble(unit_type, inferTime);
 
-				if (!allowMultipleBodies && data["objects"].size() != 1)
+				if (!allowMultipleBodies && data["objects"].size() > 1)
 				{
 					throw std::runtime_error("All images must contains only 1 body");
+				}
+				else if (!data["objects"].size())
+				{
+					throw std::runtime_error("Can't detect body in image");
 				}
 			}
 

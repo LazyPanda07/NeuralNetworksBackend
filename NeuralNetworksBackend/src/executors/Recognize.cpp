@@ -50,6 +50,12 @@ void Recognize::doGet(framework::HTTPRequest& request, framework::HTTPResponse& 
 		pipeline.emplace_back(config["unit_type"].getString(), std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
 
 		config["unit_type"] = "MATCHER_MODULE";
+
+		if (parser.contains("verifyThreshold", json::utility::variantTypeEnum::jDouble))
+		{
+			config["threshold"] = parser.getDouble("verifyThreshold");
+		}
+
 		api::ProcessingBlock matcher = service.createProcessingBlock(config);
 
 		for (const Sample& sample : samples)
@@ -152,6 +158,12 @@ void Recognize::doPost(framework::HTTPRequest& request, framework::HTTPResponse&
 		pipeline.emplace_back(config["unit_type"].getString(), std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
 
 		config["unit_type"] = "MATCHER_MODULE";
+
+		if (parser.contains("verifyThreshold", json::utility::variantTypeEnum::jDouble))
+		{
+			config["threshold"] = parser.getDouble("verifyThreshold");
+		}
+
 		api::ProcessingBlock matcher = service.createProcessingBlock(config);
 
 		for (const Sample& sample : samples)
