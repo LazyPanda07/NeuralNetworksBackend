@@ -57,6 +57,12 @@ void BodyReidentify::doPost(framework::HTTPRequest& request, framework::HTTPResp
 		json::JSONBuilder responseBuilder(CP_UTF8);
 		std::vector<json::utility::jsonObject> resultTime;
 		std::vector<json::utility::jsonObject> result;
+		bool allowMultipleBodies = parser.contains("allowMultipleBodies", json::utility::variantTypeEnum::jBool) ?
+			parser.getBool("allowMultipleBodies") :
+			false;
+		double verifyThreshold = parser.contains("verifyThreshold", json::utility::variantTypeEnum::jDouble) ?
+			parser.getDouble("verifyThreshold") :
+			100.0;
 		
 		samples.reserve(images.size() + 1);
 
@@ -78,6 +84,7 @@ void BodyReidentify::doPost(framework::HTTPRequest& request, framework::HTTPResp
 		pipeline.emplace_back(config["unit_type"].getString(), std::make_unique<api::ProcessingBlock>(service.createProcessingBlock(config)));
 
 		config["unit_type"] = "MATCHER_MODULE";
+		config["threshold"] = verifyThreshold;
 		api::ProcessingBlock matcher = service.createProcessingBlock(config);
 
 		for (const Sample& sample : samples)
@@ -97,7 +104,7 @@ void BodyReidentify::doPost(framework::HTTPRequest& request, framework::HTTPResp
 
 				time.setDouble(unit_type, inferTime);
 
-				if (data["objects"].size() != 1)
+				if (!allowMultipleBodies && data["objects"].size() != 1)
 				{
 					throw std::runtime_error("All images must contains only 1 body");
 				}
