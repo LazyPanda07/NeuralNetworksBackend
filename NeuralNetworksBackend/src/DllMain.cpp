@@ -1,5 +1,7 @@
 #include <Windows.h>
 
+#include <filesystem>
+
 #include "Sample.h"
 
 static inline constexpr DWORD bufferSize = 1024;
@@ -20,6 +22,9 @@ BOOL WINAPI DllMain(
         pathToCurrentModule.resize(bufferSize);
 
         pathToCurrentModule.resize(GetModuleFileNameA(hinstDLL, pathToCurrentModule.data(), bufferSize));
+
+        pathToCurrentModule = std::filesystem::path(pathToCurrentModule).parent_path().string();
+
         break;
 
     case DLL_THREAD_ATTACH:

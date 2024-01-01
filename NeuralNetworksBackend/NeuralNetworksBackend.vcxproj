@@ -89,7 +89,6 @@ if not exist $(OutDir)onnxruntime_cuda.dll xcopy /y $(ProjectDir)vendor\microsof
     <ClCompile Include="src\parsers\MaskParser.cpp" />
     <ClCompile Include="src\parsers\PoseParser.cpp" />
     <ClCompile Include="src\Sample.cpp" />
-    <ClCompile Include="src\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\executors\BodyReidentify.h" />
@@ -107,7 +106,6 @@ if not exist $(OutDir)onnxruntime_cuda.dll xcopy /y $(ProjectDir)vendor\microsof
     <ClInclude Include="src\parsers\MaskParser.h" />
     <ClInclude Include="src\parsers\PoseParser.h" />
     <ClInclude Include="src\Sample.h" />
-    <ClInclude Include="src\Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

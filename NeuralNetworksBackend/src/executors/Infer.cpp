@@ -5,7 +5,6 @@
 
 #include "Timers.h"
 #include "Sample.h"
-#include "Utils.h"
 
 struct ProcessingBlockPriority
 {
@@ -24,7 +23,7 @@ struct ProcessingBlockPriority
 };
 
 Infer::Infer() :
-	sdkPath(utility::getPathToCurrentModule()),
+	sdkPath(pathToCurrentModule),
 	service(api::Service::createService(sdkPath)),
 	cudaThreshold(0),
 	forceUseCuda(false)

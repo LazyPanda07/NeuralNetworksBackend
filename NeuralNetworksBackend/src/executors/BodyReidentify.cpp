@@ -1,7 +1,6 @@
 #include "BodyReidentify.h"
 
 #include "Sample.h"
-#include "Utils.h"
 #include "Timers.h"
 #include "tdv/data/Context.h"
 
@@ -23,7 +22,7 @@ void BodyReidentify::convertDoubleToFloat(api::Context& data)
 }
 
 BodyReidentify::BodyReidentify() :
-	sdkPath(utility::getPathToCurrentModule()),
+	sdkPath(pathToCurrentModule),
 	service(api::Service::createService(sdkPath)),
 	cudaThreshold(0),
 	forceUseCuda(false)

@@ -1,11 +1,10 @@
 #include "Recognize.h"
 
 #include "Sample.h"
-#include "Utils.h"
 #include "Timers.h"
 
 Recognize::Recognize() :
-	sdkPath(utility::getPathToCurrentModule()),
+	sdkPath(pathToCurrentModule),
 	service(api::Service::createService(sdkPath)),
 	cudaThreshold(0),
 	forceUseCuda(false)
