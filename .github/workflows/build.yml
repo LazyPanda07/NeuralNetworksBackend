@@ -35,7 +35,9 @@ jobs:
       working-directory: open-source-face-sdk
       run: |
           Add-Content sdk\scripts\windows\make_project.ps1 "msbuild /p:Configuration=Release /p:Platform=x64 INSTALL.vcxproj"
-          cd sdk && .\scripts\windows\make_project.ps1
+          cd sdk
+          wget https://download.3divi.com/facesdk/archives/artifacts/models/models.zip
+          .\scripts\windows\make_project.ps1
 
     - name: Rename
       working-directory: open-source-face-sdk
