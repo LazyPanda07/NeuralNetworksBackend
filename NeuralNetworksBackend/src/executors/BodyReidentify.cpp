@@ -188,3 +188,5 @@ void BodyReidentify::destroy()
 {
 
 }
+
+DECLARE_EXECUTOR(BodyReidentify)

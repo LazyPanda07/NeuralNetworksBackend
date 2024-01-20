@@ -178,3 +178,5 @@ void Infer::destroy()
 {
 
 }
+
+DECLARE_EXECUTOR(Infer)

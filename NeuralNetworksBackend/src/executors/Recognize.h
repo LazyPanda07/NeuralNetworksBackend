@@ -35,5 +35,3 @@ public:
 
 	~Recognize() = default;
 };
-
-EXECUTOR_CREATION_FUNCTION(Recognize)

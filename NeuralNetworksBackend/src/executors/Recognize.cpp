@@ -289,3 +289,5 @@ void Recognize::destroy()
 {
 
 }
+
+DECLARE_EXECUTOR(Recognize)

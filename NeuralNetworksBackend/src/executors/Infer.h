@@ -35,5 +35,3 @@ public:
 
 	~Infer() = default;
 };
-
-EXECUTOR_CREATION_FUNCTION(Infer)

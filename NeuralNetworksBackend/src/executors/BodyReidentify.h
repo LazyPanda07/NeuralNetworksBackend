@@ -38,5 +38,3 @@ public:
 
 	~BodyReidentify() = default;
 };
-
-EXECUTOR_CREATION_FUNCTION(BodyReidentify)
